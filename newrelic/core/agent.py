@@ -9,7 +9,7 @@ import time
 import sched
 import logging
 import threading
-import atexit
+import atexit # TODO 模块定义了清理函数的注册和反注册函数. 被注册的函数会在解释器正常终止时执行. atexit 会按照注册顺序的*逆序*执行; 如果你注册了 A, B 和 C, 那么在解释器终止时会依序执行 C, B, A.
 import traceback
 
 import newrelic
@@ -188,7 +188,7 @@ class Agent(object):
 
         self._creation_time = time.time()
         self._process_id = os.getpid()
-
+        # TODO _applications 的结构 str:core.application.Application
         self._applications = {} # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
         self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
 
@@ -212,7 +212,7 @@ class Agent(object):
         self._lock = threading.Lock()
 
         if self._config.enabled: # TODO 是否开启代理， _settings.enabled
-            atexit.register(self._atexit_shutdown)
+            atexit.register(self._atexit_shutdown) # TODO 将代理关闭函数注册为终止时执行函数
 
             # Register an atexit hook for uwsgi to facilitate the graceful
             # reload of workers. This is necessary for uwsgi with gevent
@@ -285,14 +285,14 @@ class Agent(object):
         application = self._applications.get(app_name)
 
         if application:
-            return application.configuration
+            return application.configuration # TODO ?????这是啥
 
     def application_attribute_filter(self, app_name):
         """Returns the attribute filter for the application."""
 
         application = self._applications.get(app_name)
         if application:
-            return application.attribute_filter
+            return application.attribute_filter # TODO ?????
 
     def activate_application(self, app_name, linked_applications=[],
                              timeout=None, uninstrumented_modules=None):
@@ -331,7 +331,7 @@ class Agent(object):
             if settings.serverless_mode.enabled:
                 timeout = 10.0
             else:
-                timeout = settings.startup_timeout
+                timeout = settings.startup_timeout # TODO 默认是0
 
         activate_session = False
 
