@@ -619,6 +619,7 @@ _settings.agent_limits.synthetics_events = 200
 _settings.agent_limits.synthetics_transactions = 20
 _settings.agent_limits.data_compression_threshold = 64 * 1024
 _settings.agent_limits.data_compression_level = None
+# TODO 时间收集配置
 _settings.event_harvest_config.harvest_limits.analytic_event_data = \
         DEFAULT_RESERVOIR_SIZE
 _settings.event_harvest_config.harvest_limits.custom_event_data = \

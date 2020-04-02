@@ -642,7 +642,7 @@ def _process_app_name_setting():
             application.link_to_application(altname)
 
     if linked:
-        # TODO ??????
+        # TODO 如果app_name配置了向其它应用上报的信息，初始化它并绑定其它应用和回调对象的关系
         newrelic.api.application.Application.run_on_initialization(
                 name, _link_applications)
         _settings.linked_applications = linked

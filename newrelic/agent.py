@@ -167,7 +167,7 @@ from newrelic.api.html_insertion import (
         verify_body_exists as __verify_body_exists)
 
 from newrelic.api.supportability import wrap_api_call as __wrap_api_call
-
+# TODO 用法很巧妙，不管是函数还是对象，都有装饰器装饰成了函数接口，对外提供API，没不要再定义那么多函数，这个装饰器背后的实现原理要深挖
 initialize = __initialize
 extra_settings = __wrap_api_call(__extra_settings,
         'extra_settings')

@@ -2,7 +2,6 @@
 interacting with the agent core.
 
 """
-
 from __future__ import print_function
 import os
 import sys
@@ -66,7 +65,7 @@ def check_environment():
 
 
 class Agent(object):
-    # TODO 代理与Application是什么关系????
+    # TODO 代理与Application是什么关系?一个代理可以对应多个application(一个账号下可以有多个Application)，可以将数据发送到多个Application
     """Only one instance of the agent should ever exist and that can be
     obtained using the agent_instance() function.
 
@@ -190,29 +189,29 @@ class Agent(object):
         self._creation_time = time.time()
         self._process_id = os.getpid()
 
-        self._applications = {}
-        self._config = config
+        self._applications = {} # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
+        self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
 
-        self._harvest_thread = threading.Thread(target=self._harvest_loop,
+        self._harvest_thread = threading.Thread(target=self._harvest_loop, # TODO 收集线程，循环收集，是守护线程
                 name='NR-Harvest-Thread')
-        self._harvest_thread.setDaemon(True)
-        self._harvest_shutdown = threading.Event()
+        self._harvest_thread.setDaemon(True) # TODO 设置为守护线程
+        self._harvest_shutdown = threading.Event() # TODO 信号标志，用于线程间通信，将内部标志设置为true。 所有等待它成为真正的线程都被唤醒
 
-        self._default_harvest_count = 0
-        self._flexible_harvest_count = 0
-        self._last_default_harvest = 0.0
-        self._last_flexible_harvest = 0.0
-        self._default_harvest_duration = 0.0
-        self._flexible_harvest_duration = 0.0
-        self._scheduler = sched.scheduler(
-                self._harvest_timer,
+        self._default_harvest_count = 0  # TODO 默认收集方式次数
+        self._flexible_harvest_count = 0  # TODO 弹性收集方式次数
+        self._last_default_harvest = 0.0  # TODO 最近默认收集方式时间
+        self._last_flexible_harvest = 0.0  # TODO 最近弹性收集方式时间
+        self._default_harvest_duration = 0.0  # TODO 默认收集方式耗时
+        self._flexible_harvest_duration = 0.0  # TODO 弹性收集方式耗时
+        self._scheduler = sched.scheduler(  # TODO 事件调度器，有它可以实现周期任务，优先级任务
+                self._harvest_timer,  # TODO 第一个参数是一个可以返回时间戳的函数，第二个参数可以在定时未到达之前阻塞
                 self._harvest_shutdown.wait)
 
         self._process_shutdown = False
 
         self._lock = threading.Lock()
 
-        if self._config.enabled:
+        if self._config.enabled: # TODO 是否开启代理， _settings.enabled
             atexit.register(self._atexit_shutdown)
 
             # Register an atexit hook for uwsgi to facilitate the graceful
@@ -564,7 +563,8 @@ class Agent(object):
         return application.compute_sampled()
 
     def _harvest_flexible(self, shutdown=False):
-        if not self._harvest_shutdown.isSet():
+        # TODO 弹性收集Application数据
+        if not self._harvest_shutdown.isSet(): # TODO 如果线程阻塞，再将收集任务放进调度任务器里，这是一个递归调用的过程，一直等待阻塞结束
             event_harvest_config = self.global_settings().event_harvest_config
 
             self._scheduler.enter(
@@ -581,7 +581,7 @@ class Agent(object):
         self._flexible_harvest_count += 1
         self._last_flexible_harvest = time.time()
 
-        for application in list(six.itervalues(self._applications)):
+        for application in list(six.itervalues(self._applications)): # TODO 为每个应用收集数据
             try:
                 application.harvest(shutdown=False, flexible=True)
             except Exception:
@@ -595,6 +595,7 @@ class Agent(object):
                 'seconds.', self._flexible_harvest_duration)
 
     def _harvest_default(self, shutdown=False):
+        # TODO 默认收集
         if not self._harvest_shutdown.isSet():
             self._scheduler.enter(60.0, 2, self._harvest_default, ())
             _logger.debug('Commencing default harvest of application data.')
@@ -620,8 +621,8 @@ class Agent(object):
                 'seconds.', self._default_harvest_duration)
 
     def _harvest_timer(self):
-        if self._harvest_shutdown.isSet():
-            return float("inf")
+        if self._harvest_shutdown.isSet(): # TODO 如果事件对象标志是true，所有等待它的线程都被唤醒
+            return float("inf") # TODO 返回正无穷大，不阻塞
         return time.time()
 
     def _harvest_loop(self):
@@ -631,7 +632,7 @@ class Agent(object):
         event_harvest_config = settings.event_harvest_config
 
         self._scheduler.enter(
-                event_harvest_config.report_period_ms / 1000.0,
+                event_harvest_config.report_period_ms / 1000.0, # TODO 间隔时间默认是60s
                 1,
                 self._harvest_flexible,
                 ())

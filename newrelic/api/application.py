@@ -15,7 +15,7 @@ class Application(object):
     _lock = threading.Lock()
     _instances = {}
 
-    _delayed_callables = {}
+    _delayed_callables = {} # TODO 延迟可调用对象，那有什么作用呢?可以支持向其它应用报告数据，key-value代表other-app-nane:回调对象
 
     @staticmethod
     def _instance(name):
@@ -47,11 +47,12 @@ class Application(object):
 
     @staticmethod
     def run_on_initialization(name, callback):
+        # TODO 在初始化时运行
         Application._delayed_callables[name] = callback
 
     def __init__(self, name, agent=None):
         self._name = name
-        self._linked = {}
+        self._linked = {}  # TODO 可以向多个应用报告数据（一个账号下有多个application,可以向多个应用报告数据），这个变量就是记录其它应用的标识
         self.enabled = True
 
         if agent is None:
