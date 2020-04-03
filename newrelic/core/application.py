@@ -542,7 +542,7 @@ class Application(object):
         first time this is detected for current active session.
 
         """
-
+        # TODO 校验进程号是否一致
         process_id = os.getpid()
 
         # Detect where potentially trying to record any data in a

@@ -36,7 +36,7 @@ except ImportError:
         return output
 
 try:
-    import resource
+    import resource # TODO 只有unix系统采有的包，获得系统资源信息
 except ImportError:
     pass
 

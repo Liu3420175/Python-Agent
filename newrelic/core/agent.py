@@ -187,7 +187,7 @@ class Agent(object):
         _logger.debug('Initializing Python agent.')
 
         self._creation_time = time.time()
-        self._process_id = os.getpid()
+        self._process_id = os.getpid()  # TODO 当前进程id
         # TODO _applications 的结构 str:core.application.Application
         self._applications = {} # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
         self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
@@ -281,7 +281,7 @@ class Agent(object):
         the agent in case that hasn't been done previously.
 
         """
-
+        #TODO 获取某个应用的配置
         application = self._applications.get(app_name)
 
         if application:
@@ -289,7 +289,7 @@ class Agent(object):
 
     def application_attribute_filter(self, app_name):
         """Returns the attribute filter for the application."""
-
+        # TODO attribute filter是啥，起啥作用?????
         application = self._applications.get(app_name)
         if application:
             return application.attribute_filter
@@ -314,6 +314,7 @@ class Agent(object):
         handshake to get back configuration settings for application.
 
         """
+        # TODO uninstrumented_modules 变量起啥作用?????
 
         if not self._config.enabled:
             return
@@ -346,7 +347,7 @@ class Agent(object):
                             'Attempt to activate application in a process '
                             'different to where the agent harvest thread was '
                             'started. No data will be reported for this '
-                            'process with pid of %d. Creation of the harvest '
+                            'process with pid of %d. Creation of the harvest ' # TODO 有个单独的收集数据线程????
                             'thread this application occurred in process with '
                             'pid %d. If no data at all is being reported for '
                             'your application, see '
@@ -378,7 +379,7 @@ class Agent(object):
                 activate_session = True
 
                 # Register any data sources with the application.
-
+                # TODO 注册数据源
                 for source, name, settings, properties in \
                         self._data_sources.get(None, []):
                     application.register_data_source(source, name,
@@ -394,14 +395,14 @@ class Agent(object):
                 # application in a different process to what it was
                 # originally activated in.
 
-                application.validate_process()
+                application.validate_process() # TODO 校验进程号
 
             # Activate the session if application was just created and wait
             # for session activation if a timeout was specified. This may
             # bail out early if is detected that a deadlock may occur for
             # the period of the timeout.
 
-            if activate_session:
+            if activate_session: # TODO 为啥要加这个条件?????
                 application.activate_session(self.activate_agent, timeout)
 
     @property
@@ -465,6 +466,7 @@ class Agent(object):
                             settings, **properties)
 
     def remove_thread_utilization(self):
+        # TODO 移除线程利用率
 
         _logger.debug('Removing thread utilization data source from all '
                 'applications')

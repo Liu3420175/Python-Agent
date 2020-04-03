@@ -84,6 +84,7 @@ class DataSampler(object):
             self.instance = None
 
     def metrics(self):
+        # TODO 用处在哪里????
         if self.instance is None:
             return []
 
