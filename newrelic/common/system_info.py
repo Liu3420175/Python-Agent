@@ -54,6 +54,7 @@ LOCALHOST_EQUIVALENTS = set([
 
 
 def logical_processor_count():
+    # TODO 返回系统逻辑处理器数量， 要兼容多种操作系统，所以这里不能简单的直接用multiprocessing.cpu_count()
     """Returns the number of logical processors in the system.
 
     """

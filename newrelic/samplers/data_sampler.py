@@ -2,6 +2,7 @@
 manages the consumption of data from a data source.
 
 """
+# TODO 数据采样器
 
 import logging
 
@@ -12,7 +13,15 @@ _logger = logging.getLogger(__name__)
 class DataSampler(object):
 
     def __init__(self, consumer, source, name, settings, **properties):
-        self.consumer = consumer
+        """
+
+        :param consumer:
+        :param source:  #TODO 是一个可调用对象，采集数据指标的函数
+        :param name: # TODO 采集的数据名称
+        :param settings:
+        :param properties:
+        """
+        self.consumer = consumer # TODO 消费者
 
         self.settings = settings
         self.source_properties = source(settings)
@@ -46,7 +55,7 @@ class DataSampler(object):
         environ['consumer.name'] = consumer
         environ['consumer.vendor'] = 'New Relic'
         environ['producer.name'] = self.name
-        environ['producer.group'] = self.group
+        environ['producer.group'] = self.group # TODO 生产者
         environ['producer.guid'] = self.guid
         environ['producer.version'] = self.version
 

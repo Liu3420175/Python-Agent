@@ -235,7 +235,7 @@ class Agent(object):
 
                 uwsgi.atexit = uwsgi_atexit_callback
 
-        self._data_sources = {}
+        self._data_sources = {} # TODO 要上报的数据指标，在这里面叫数据源
 
     def dump(self, file):
         """Dumps details about the agent to the file object."""
@@ -285,14 +285,14 @@ class Agent(object):
         application = self._applications.get(app_name)
 
         if application:
-            return application.configuration # TODO ?????这是啥
+            return application.configuration
 
     def application_attribute_filter(self, app_name):
         """Returns the attribute filter for the application."""
 
         application = self._applications.get(app_name)
         if application:
-            return application.attribute_filter # TODO ?????
+            return application.attribute_filter
 
     def activate_application(self, app_name, linked_applications=[],
                              timeout=None, uninstrumented_modules=None):
@@ -419,16 +419,17 @@ class Agent(object):
         return self._applications
 
     def application(self, app_name):
-        """Returns the internal application object for the named
+        """
+        Returns the internal application object for the named
         application or None if not created. When an application object
         is returned, it does not relect whether activation has been
         successful or not. To determine if application is currently in an
         activated state use application_settings() method to see if a valid
         application settings objects is available or query the application
         object directly.
-
+        :param app_name:
+        :return: # TODO  newrelic.core.application.Application
         """
-
         return self._applications.get(app_name, None)
 
     def register_data_source(self, source, application=None,
@@ -436,7 +437,7 @@ class Agent(object):
         """Registers the specified data source.
 
         """
-        # TODO 注册数据源
+        # TODO 注册数据源，数据源是啥?数据源就是指要上报的数据指标
 
         _logger.debug('Register data source with agent %r.',
                 (source, application, name, settings, properties))
@@ -447,7 +448,7 @@ class Agent(object):
             self._data_sources.setdefault(application, []).append(
                     (source, name, settings, properties))
 
-            if application is None:
+            if application is None: # TODO 如果没有制定应用，就将数据源注册到每个应用里
                 # Bind to any applications that already exist.
 
                 for application in list(six.itervalues(self._applications)):

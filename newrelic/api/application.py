@@ -9,7 +9,7 @@ import newrelic.packages.six as six
 
 class Application(object):
     """
-    # TODO  定义一个监控应用的对象，一个应用名称只能有一个实例
+    # TODO  定义一个监控应用的对象，一个应用名称只能有一个实例，这个Application只是对外提供接口，真正起作用的是core.application.Application对象
     """
 
     _lock = threading.Lock()
