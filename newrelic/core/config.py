@@ -476,12 +476,13 @@ _settings.high_security = _environ_as_bool('NEW_RELIC_HIGH_SECURITY', False)
 
 _settings.attribute_filter = None
 
-_settings.collect_errors = True
-_settings.collect_error_events = True
-_settings.collect_traces = True
-_settings.collect_span_events = True
-_settings.collect_analytics_events = True
-_settings.collect_custom_events = True
+# TODO 收集配置
+_settings.collect_errors = True # TODO 是否收集错误
+_settings.collect_error_events = True # TODO 是否收集错误事物
+_settings.collect_traces = True # TODO 是否收集
+_settings.collect_span_events = True # TODO 是否跨度事物
+_settings.collect_analytics_events = True # TODO 是否收集分析事物
+_settings.collect_custom_events = True # TODO 是否自定义事物
 
 _settings.apdex_t = _environ_as_float('NEW_RELIC_APDEX_T', 0.5)
 _settings.web_transactions_apdex = {}
@@ -570,6 +571,7 @@ _settings.transaction_tracer.attributes.enabled = True
 _settings.transaction_tracer.attributes.exclude = []
 _settings.transaction_tracer.attributes.include = []
 
+# TODO api 错误收集器配置信息
 _settings.error_collector.enabled = True
 _settings.error_collector.capture_events = True
 _settings.error_collector.capture_source = False
@@ -599,6 +601,7 @@ _settings.slow_sql.enabled = True
 
 _settings.synthetics.enabled = True
 
+# TODO 代理的限制
 _settings.agent_limits.data_collector_timeout = 30.0
 _settings.agent_limits.transaction_traces_nodes = 2000
 _settings.agent_limits.sql_query_length_maximum = 16384
@@ -964,7 +967,7 @@ def finalize_application_settings(server_side_config={}, settings=_settings):
     application_settings = apply_server_side_settings(
             server_side_config, settings)
 
-    application_settings.attribute_filter = AttributeFilter(
+    application_settings.attribute_filter = AttributeFilter( # TODO 属性过滤器
             flatten_settings(application_settings))
 
     return application_settings

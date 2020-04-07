@@ -3,6 +3,8 @@ required when sending errors and point of call for slow database queries
 etc.
 
 """
+# TODO 该模块解析Python异常栈
+# TODO 直接用traceback包
 
 import sys
 import itertools
@@ -99,7 +101,7 @@ def exception_stack(tb, limit=None):
         return []
 
     if limit is None:
-        limit = _global_settings.max_stack_trace_lines
+        limit = _global_settings.max_stack_trace_lines # TODO 最大展示异常栈行数
 
     # The traceback objects provide a chain for stack frames from the
     # top point of where the exception was caught, down to where the

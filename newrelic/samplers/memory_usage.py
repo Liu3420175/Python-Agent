@@ -14,8 +14,14 @@ def memory_usage_data_source():
 
 
 if __name__ == '__main__':
-    @data_source_generator(name='test')
-    def f():
-        return 1
+    import sys
+    def f(a):
+        print(a.name)
+    try:
+        f(1)
+    except:
+        a,b,c = sys.exc_info()
+        #print(a.__name__,c)
 
-    print(f.__dict__['__wrapped__']())
+        print(b.message)
+

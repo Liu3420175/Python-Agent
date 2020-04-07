@@ -4,6 +4,7 @@ engine per application. This will be cleared upon each successful harvest of
 data whereby it is sent to the core application.
 
 """
+# TODO 统计引擎是收集累计事物指标，错误详情，慢事物。 每个应用都有一个统计引擎示例。当成功收集的数据发送到核心应用后，它会被清空
 
 import base64
 import copy
@@ -32,11 +33,11 @@ from newrelic.common.encoding_utils import json_encode
 _logger = logging.getLogger(__name__)
 
 EVENT_HARVEST_METHODS = {
-    'analytic_event_data': ('reset_transaction_events',
+    'analytic_event_data': ('reset_transaction_events', # TODO 事物
                             'reset_synthetics_events',),
-    'span_event_data': ('reset_span_events',),
-    'custom_event_data': ('reset_custom_events',),
-    'error_event_data': ('reset_error_events',),
+    'span_event_data': ('reset_span_events',),  # TODO 跨度事件
+    'custom_event_data': ('reset_custom_events',), # TODO 自定义事件
+    'error_event_data': ('reset_error_events',),  # TODO 错误事件
 }
 
 
@@ -45,6 +46,7 @@ def c2t(count=0, total=0.0, min=0.0, max=0.0, sum_of_squares=0.0):
 
 
 class ApdexStats(list):
+    # TODO 用于累计apdex 指标的桶，我们知道apdex默认值是0.5,可以通过配置来决定是否开启动态变化的功能
 
     """Bucket for accumulating apdex metrics.
 
@@ -59,10 +61,12 @@ class ApdexStats(list):
     def __init__(self, satisfying=0, tolerating=0, frustrating=0, apdex_t=0.0):
         super(ApdexStats, self).__init__([satisfying, tolerating,
                 frustrating, apdex_t, apdex_t, 0])
+        # TODO 自定义一个长度为6的固定列表，这种用法有啥好处呢????
+        # TODO 前三个数据是指标数据，第四第五与apdex_t有关
 
-    satisfying = property(operator.itemgetter(0))
-    tolerating = property(operator.itemgetter(1))
-    frustrating = property(operator.itemgetter(2))
+    satisfying = property(operator.itemgetter(0)) # TODO 满意度, f=operator.itemgetter(0),返回的是可调用的对象，如果对象r有 __getitem__()方法，则f(r)始终返回r的0索引位置的值
+    tolerating = property(operator.itemgetter(1)) # 符合预期
+    frustrating = property(operator.itemgetter(2)) # 失望
 
     def merge_stats(self, other):
         """Merge data from another instance of this object."""
@@ -88,6 +92,7 @@ class ApdexStats(list):
 
 
 class TimeStats(list):
+    # TODO 时间统计器
 
     """Bucket for accumulating time and value metrics.
 
@@ -100,12 +105,21 @@ class TimeStats(list):
     def __init__(self, call_count=0, total_call_time=0.0,
                 total_exclusive_call_time=0.0, min_call_time=0.0,
                 max_call_time=0.0, sum_of_squares=0.0):
+        """
+
+        :param call_count:  TODO  调用次数
+        :param total_call_time:  TODO 总共调用时间
+        :param total_exclusive_call_time: TODO 被忽略掉的总时间
+        :param min_call_time:  TODO 最小调用时间
+        :param max_call_time:  TODO 最大调用时间
+        :param sum_of_squares:  TODO 平方和
+        """
         if total_exclusive_call_time is None:
             total_exclusive_call_time = total_call_time
         super(TimeStats, self).__init__([call_count, total_call_time,
                 total_exclusive_call_time, min_call_time,
                 max_call_time, sum_of_squares])
-
+    #
     call_count = property(operator.itemgetter(0))
     total_call_time = property(operator.itemgetter(1))
     total_exclusive_call_time = property(operator.itemgetter(2))
@@ -115,7 +129,7 @@ class TimeStats(list):
 
     def merge_stats(self, other):
         """Merge data from another instance of this object."""
-
+        # TODO 将其它的统计器合并
         self[1] += other[1]
         self[2] += other[2]
         self[3] = self[0] and min(self[3], other[3]) or other[3]
@@ -129,7 +143,7 @@ class TimeStats(list):
 
     def merge_raw_time_metric(self, duration, exclusive=None):
         """Merge time value."""
-
+        # TODO 将一个时间值直接合并到统计器里
         if exclusive is None:
             exclusive = duration
 
@@ -146,16 +160,19 @@ class TimeStats(list):
 
     def merge_time_metric(self, metric):
         """Merge data from a time metric object."""
+        # TODO metric是啥??????
 
         self.merge_raw_time_metric(metric.duration, metric.exclusive)
 
     def merge_custom_metric(self, value):
         """Merge data value."""
+        # TODO 合并自定义指标数据
 
         self.merge_raw_time_metric(value)
 
 
 class CountStats(TimeStats):
+    # TODO 次数统计器
 
     def merge_stats(self, other):
         self[0] += other[0]
@@ -169,9 +186,10 @@ class CustomMetrics(object):
     """Table for collection a set of value metrics.
 
     """
+    # TODO 指标收集表
 
     def __init__(self):
-        self.__stats_table = {}
+        self.__stats_table = {} # TODO key是字符串。value是时间统计器
 
     def __contains__(self, key):
         return key in self.__stats_table
@@ -202,7 +220,7 @@ class CustomMetrics(object):
 
         """
 
-        return six.iteritems(self.__stats_table)
+        return six.iteritems(self.__stats_table) # TODO 返回一个迭代器，等价与 iter(self.__stats_table.items)
 
     def reset_metric_stats(self):
         """Resets the accumulated statistics back to initial state for
@@ -213,6 +231,7 @@ class CustomMetrics(object):
 
 
 class SlowSqlStats(list):
+    # TODO 慢SQL 统计器
 
     def __init__(self):
         super(SlowSqlStats, self).__init__([0, 0, 0, 0, None])
@@ -240,7 +259,7 @@ class SlowSqlStats(list):
 
     def merge_slow_sql_node(self, node):
         """Merge data from a slow sql node object."""
-
+        # TODO node是啥?????
         duration = node.duration
 
         self[1] += duration
@@ -257,11 +276,14 @@ class SlowSqlStats(list):
 
 
 class SampledDataSet(object):
+    """
+    #TODO 已采集数据集合
+    """
     def __init__(self, capacity=100):
-        self.pq = []
+        self.pq = [] # TODO 成员(priority, num_seen, sample) 表示优先级，当前已容纳数据量，采集数据
         self.heap = False
-        self.capacity = capacity
-        self.num_seen = 0
+        self.capacity = capacity #　TODO 容量
+        self.num_seen = 0 # TODO ????
 
         if capacity <= 0:
             def add(*args, **kwargs):
@@ -270,6 +292,7 @@ class SampledDataSet(object):
 
     @property
     def samples(self):
+        # TODO 获取采集数据，分析后很容易明白
         return (x[-1] for x in self.pq)
 
     @property
@@ -292,6 +315,7 @@ class SampledDataSet(object):
         self.num_seen = 0
 
     def should_sample(self, priority):
+        # TODO 该统计器是否可继续采集数据，如果设置了优先级。add函数会把pd转换成最小堆，pq[0][0]是优先级最小的，只有大于它才能被采集
         if self.heap:
             # self.pq[0] is always the minimal
             # priority sample in the queue
@@ -304,11 +328,12 @@ class SampledDataSet(object):
         return True
 
     def add(self, sample, priority=None):
+        # TODO 添加采集数据
         self.num_seen += 1
 
         if priority is None:
             priority = random.random()
-
+        # TODO 当已容纳的数据超过容量时，pq就变成了堆，后边的添加动作就堆添加且要有优先级关系
         entry = (priority, self.num_seen, sample)
         if self.num_seen == self.capacity:
             self.pq.append(entry)
@@ -319,7 +344,7 @@ class SampledDataSet(object):
             sampled = self.should_sample(priority)
             if not sampled:
                 return
-            heapreplace(self.pq, entry)
+            heapreplace(self.pq, entry) # TODO 弹出并返回 heap 中最小的一项，同时推入新的 item。 堆的大小不变
 
     def merge(self, other_data_set):
         for priority, seen_at, sample in other_data_set.pq:
@@ -332,6 +357,7 @@ class SampledDataSet(object):
 
 
 class LimitedDataSet(list):
+    # TODO 有大小限制的数据集合器
 
     def __init__(self, capacity=200):
         super(LimitedDataSet, self).__init__()
@@ -408,24 +434,25 @@ class StatsEngine(object):
     it at the same time.
 
     """
-
+    # TODO 统计引擎对象保存累积的事物指标，错误和慢事物的详细信息。每一个应用都应该有一个统计引擎实例。当成功收集的数据发送到核心应用后，它会被清空。
+    # TODO 然而，没有数据会被积累(收集)如果已经成功激活的应用没有关联的配置信息和接受服务端的配置
     def __init__(self):
         self.__settings = None
         self.__stats_table = {}
-        self._transaction_events = SampledDataSet()
-        self._error_events = SampledDataSet()
-        self._custom_events = SampledDataSet()
-        self._span_events = SampledDataSet()
-        self.__sql_stats_table = {}
-        self.__slow_transaction = None
-        self.__slow_transaction_map = {}
+        self._transaction_events = SampledDataSet() # TODO 事物事件
+        self._error_events = SampledDataSet() # TODO 错误事件
+        self._custom_events = SampledDataSet() # TODO 自定义事件
+        self._span_events = SampledDataSet() # TODO 跨度事物
+        self.__sql_stats_table = {} # TODO SQL统计表
+        self.__slow_transaction = None # TODO 慢事物
+        self.__slow_transaction_map = {} # TODO 慢事物映射表
         self.__slow_transaction_old_duration = None
         self.__slow_transaction_dry_harvests = 0
-        self.__transaction_errors = []
-        self._synthetics_events = LimitedDataSet()
+        self.__transaction_errors = [] # TODO 引发错误的事物
+        self._synthetics_events = LimitedDataSet() # TODO 合成事物????
         self.__synthetics_transactions = []
         self.__xray_transactions = []
-        self.xray_sessions = {}
+        self.xray_sessions = {} # TODO X-Ray回话是啥?????
 
     @property
     def settings(self):
@@ -464,7 +491,7 @@ class StatsEngine(object):
         recorded for apdex, time and value metrics.
 
         """
-
+        # TODO 指标总数
         return len(self.__stats_table)
 
     def record_apdex_metric(self, metric):
@@ -472,6 +499,7 @@ class StatsEngine(object):
         from prior apdex metrics with the same name.
 
         """
+        # TODO 记录Apdex指标， metric是啥???
 
         if not self.__settings:
             return
@@ -487,7 +515,7 @@ class StatsEngine(object):
         if stats is None:
             stats = ApdexStats(apdex_t=metric.apdex_t)
             self.__stats_table[key] = stats
-        stats.merge_apdex_metric(metric)
+        stats.merge_apdex_metric(metric) # TODO 合并apdex指标，获取累计值信息
 
         return key
 
@@ -509,6 +537,7 @@ class StatsEngine(object):
         from prior time metrics with the same name and scope.
 
         """
+        # TODO 记录时间指标， metric是啥???
 
         if not self.__settings:
             return
@@ -546,23 +575,32 @@ class StatsEngine(object):
 
     def record_exception(self, exc=None, value=None, tb=None, params={},
             ignore_errors=[]):
+        """
+        # TODO 记录异常
+        :param exc: TODO 异常类型
+        :param value: TODO 异常值
+        :param tb: TODO 异常回溯，是traceback对象
+        :param params: # TODO 参数
+        :param ignore_errors: # TODO 忽略的异常
+        :return:
+        """
 
         settings = self.__settings
 
         if not settings:
             return
 
-        error_collector = settings.error_collector
+        error_collector = settings.error_collector # TODO 获取错误收集器配置信息
 
-        if not error_collector.enabled:
+        if not error_collector.enabled: # TODO 如果没有开启错误配置信息，直接返回
             return
 
-        if not settings.collect_errors and not settings.collect_error_events:
+        if not settings.collect_errors and not settings.collect_error_events: # TODO 如果配置不准许收集错误和错误事件，返回，默认情况下是准许的
             return
 
         # If no exception details provided, use current exception.
 
-        if exc is None and value is None and tb is None:
+        if exc is None and value is None and tb is None: # TODO 如果没提供异常类型，值和回溯，用当前异常信息
             exc, value, tb = sys.exc_info()
 
         # Has to be an error to be logged.
@@ -595,7 +633,7 @@ class StatsEngine(object):
             # for backward compatibility need to support '.' as
             # separator for time being. Check that with the ':'
             # last as we will use that name as the exception type.
-
+            # TODO ignore_errors的格式是module:value_name或者module.value_name
             if module:
                 fullname = '%s.%s' % (module, name)
             else:
@@ -626,7 +664,7 @@ class StatsEngine(object):
 
         # Only add params if High Security Mode is off.
 
-        if settings.high_security:
+        if settings.high_security: # TODO 如果是高保密模式，不收集参数
             if params:
                 _logger.debug('Cannot add custom parameters in '
                         'High Security Mode.')
@@ -646,10 +684,10 @@ class StatsEngine(object):
                 custom_params = {}
 
             attributes = create_user_attributes(custom_params,
-                    settings.attribute_filter)
+                    settings.attribute_filter)  # TODO 使用属性过滤器创建用户属性,属性过滤器是啥??????
 
         # Check to see if we need to strip the message before recording it.
-
+        # TODO 是否截去异常的回溯信息，在高保密模式下，该值自动为true, 截去异常回溯信息白名单，在名单里就不会截去
         if (settings.strip_exception_messages.enabled and
                 fullname not in settings.strip_exception_messages.whitelist):
             message = STRIP_EXCEPTION_MESSAGE
@@ -676,10 +714,10 @@ class StatsEngine(object):
 
         params = {}
 
-        params["stack_trace"] = exception_stack(tb)
+        params["stack_trace"] = exception_stack(tb) # TODO 异常栈信息
 
         # filter custom error specific params using attribute filter (user)
-        params['userAttributes'] = {}
+        params['userAttributes'] = {} # TODO 用户属性????有啥用
         for attr in attributes:
             if attr.destinations & DST_ERROR_COLLECTOR:
                 params['userAttributes'][attr.name] = attr.value
@@ -693,7 +731,7 @@ class StatsEngine(object):
 
         # Save this error as a trace and an event.
 
-        if error_collector.capture_events and settings.collect_error_events:
+        if error_collector.capture_events and settings.collect_error_events: # TODO 如果配置准许补货错误时间
             event = self._error_event(error_details)
             self._error_events.add(event)
 
@@ -710,7 +748,11 @@ class StatsEngine(object):
 
         # This method is for recording error events outside of transactions,
         # don't let the poorly named 'type' attribute fool you.
+        """
 
+        :param error:  TODO newrelic.core.error_collector.TracedError
+        :return:
+        """
         intrinsics = {
                 'type': 'TransactionError',
                 'error.class': error.type,
@@ -726,6 +768,7 @@ class StatsEngine(object):
         return error_event
 
     def record_custom_event(self, event):
+        # TODO 记录自定义事务
 
         settings = self.__settings
 
@@ -741,6 +784,7 @@ class StatsEngine(object):
         from prior value metrics with the same name.
 
         """
+        # TODO 记录自定义指标
         key = (name, '')
 
         if isinstance(value, dict):

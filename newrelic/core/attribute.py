@@ -1,3 +1,4 @@
+# TODO 处理熟悉参数的模块
 import logging
 
 from collections import namedtuple
@@ -80,6 +81,7 @@ class CastingFailureException(Exception):
 
 
 class Attribute(_Attribute):
+    # TODO 是一个命名元组，用的好，这里面用了大量的命名元组，避免了重新定义类
 
     def __repr__(self):
         return "Attribute(name=%r, value=%r, destinations=%r)" % (
@@ -188,6 +190,7 @@ def check_name_length(name, max_length=MAX_ATTRIBUTE_LENGTH, encoding='utf-8'):
 
 
 def check_name_is_string(name):
+    # TODO 检查名称是不是字符串
     if not isinstance(name, (six.text_type, six.binary_type)):
         raise NameIsNotStringException()
 
@@ -208,7 +211,7 @@ def process_user_attribute(
     #
     # If any of these checks fail, they will raise an exception, so we
     # log a message, and return (None, None).
-
+    # TODO 处理用户属性名和值，属性值最大长度255，不过可更改
     FAILED_RESULT = (None, None)
 
     try:

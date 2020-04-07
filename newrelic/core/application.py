@@ -47,33 +47,34 @@ class Application(object):
         _logger.debug('Initializing application with name %r and '
                 'linked applications of %r.', app_name, linked_applications)
 
-        self._creation_time = time.time()
+        self._creation_time = time.time() # TODO　应用初始化时间
 
         self._app_name = app_name
         self._linked_applications = sorted(set(linked_applications))
 
-        self._process_id = None
+        self._process_id = None # TODO 进程ID
 
         self._period_start = 0.0
 
         self._active_session = None
-        self._harvest_enabled = False
+        self._harvest_enabled = False # TODO 是否收集数据????
 
-        self._transaction_count = 0
+        self._transaction_count = 0 # TODO 监控事物次数
         self._last_transaction = 0.0
 
         self.adaptive_sampler = None
 
         self._global_events_account = 0
 
-        self._harvest_count = 0
+        self._harvest_count = 0  # TODO 收集次数
 
-        self._discard_count = 0
+        self._discard_count = 0 # TODO 丢弃次数
 
-        self._agent_restart = 0
+        self._agent_restart = 0  # TODO 代理重启次数
         self._pending_shutdown = False
         self._agent_shutdown = False
-
+        # TODO threading.Event 事件处理的机制：全局定义了一个内置标志Flag，如果Flag值为 False，那么当程序执行 event.wait方法时就会阻塞，如果Flag值为True，
+        # TODO 那么event.wait 方法时便不再阻塞。Event其实就是一个简化版的 Condition。Event没有锁，无法使线程进入同步阻塞状态
         self._connected_event = threading.Event()
 
         self._detect_deadlock = False
