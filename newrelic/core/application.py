@@ -81,7 +81,7 @@ class Application(object):
         self._deadlock_event = threading.Event()
 
         self._stats_lock = threading.RLock()
-        self._stats_engine = StatsEngine()
+        self._stats_engine = StatsEngine() # TODO 统计引擎，一个应用对应一个统计引擎
 
         self._stats_custom_lock = threading.RLock()
         self._stats_custom_engine = StatsEngine()

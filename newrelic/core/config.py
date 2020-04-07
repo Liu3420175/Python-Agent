@@ -479,7 +479,7 @@ _settings.attribute_filter = None
 # TODO 收集配置
 _settings.collect_errors = True # TODO 是否收集错误
 _settings.collect_error_events = True # TODO 是否收集错误事物
-_settings.collect_traces = True # TODO 是否收集
+_settings.collect_traces = True # TODO 是否收集追踪信息
 _settings.collect_span_events = True # TODO 是否跨度事物
 _settings.collect_analytics_events = True # TODO 是否收集分析事物
 _settings.collect_custom_events = True # TODO 是否自定义事物

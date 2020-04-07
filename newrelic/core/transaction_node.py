@@ -16,7 +16,7 @@ from newrelic.core.attribute import (create_user_attributes,
 from newrelic.core.attribute_filter import (DST_ERROR_COLLECTOR,
         DST_TRANSACTION_TRACER, DST_TRANSACTION_EVENTS, DST_SPAN_EVENTS)
 
-
+# TODO 分析这快源码时，一定要结合newrelic.core.stats_engine.StatsEngine类分析
 _TransactionNode = namedtuple('_TransactionNode',
         ['settings', 'path', 'type', 'group', 'base_name', 'name_for_metric',
         'port', 'request_uri', 'queue_start', 'start_time',

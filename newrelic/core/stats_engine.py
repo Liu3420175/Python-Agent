@@ -436,15 +436,16 @@ class StatsEngine(object):
     """
     # TODO 统计引擎对象保存累积的事物指标，错误和慢事物的详细信息。每一个应用都应该有一个统计引擎实例。当成功收集的数据发送到核心应用后，它会被清空。
     # TODO 然而，没有数据会被积累(收集)如果已经成功激活的应用没有关联的配置信息和接受服务端的配置
+    # TODO 这个统计器不一定适合我们!!!!!
     def __init__(self):
         self.__settings = None
         self.__stats_table = {}
         self._transaction_events = SampledDataSet() # TODO 事物事件
-        self._error_events = SampledDataSet() # TODO 错误事件
+        self._error_events = SampledDataSet() # TODO 错误事件统计信息
         self._custom_events = SampledDataSet() # TODO 自定义事件
         self._span_events = SampledDataSet() # TODO 跨度事物
         self.__sql_stats_table = {} # TODO SQL统计表
-        self.__slow_transaction = None # TODO 慢事物
+        self.__slow_transaction = None # TODO 慢事物,最慢的事务，属于统计指标
         self.__slow_transaction_map = {} # TODO 慢事物映射表
         self.__slow_transaction_old_duration = None
         self.__slow_transaction_dry_harvests = 0
@@ -737,7 +738,7 @@ class StatsEngine(object):
 
         if settings.collect_errors and (len(self.__transaction_errors) <
                 settings.agent_limits.errors_per_harvest):
-            self.__transaction_errors.append(error_details)
+            self.__transaction_errors.append(error_details) # TODO 更新事务错误列表
 
         # Regardless of whether we record the trace or the event we still
         # want to increment the metric Errors/all
@@ -784,7 +785,7 @@ class StatsEngine(object):
         from prior value metrics with the same name.
 
         """
-        # TODO 记录自定义指标
+        # TODO 记录自定义指标，属于统计指标
         key = (name, '')
 
         if isinstance(value, dict):
@@ -821,11 +822,12 @@ class StatsEngine(object):
         from prior sql metrics for the same sql key.
 
         """
-
+        # TODO 记录慢SQL节点，统计指标，这些统计指标不一定适合我们，可以移除掉 !!!!!!
+        # TODO node newrelic.core.database_node.pySlowSqlNode
         if not self.__settings:
             return
 
-        key = node.identifier
+        key = node.identifier # TODO sql识别码，怎么个算法????
         stats = self.__sql_stats_table.get(key)
         if stats is None:
             # Only record slow SQL if not already over the limit on
@@ -834,7 +836,7 @@ class StatsEngine(object):
             settings = self.__settings
             maximum = settings.agent_limits.slow_sql_data
             if len(self.__sql_stats_table) < maximum:
-                stats = SlowSqlStats()
+                stats = SlowSqlStats() # TODO 慢SQL统计指标
                 self.__sql_stats_table[key] = stats
 
         if stats:
@@ -846,7 +848,7 @@ class StatsEngine(object):
         """Check if transaction is an x-ray transaction and save it to the
         __xray_transactions
         """
-
+        # TODO ???????
         settings = self.__settings
 
         # Nothing to do if we have reached the max limit of x-ray transactions
@@ -869,7 +871,8 @@ class StatsEngine(object):
         """Check if transaction is the slowest transaction and update
         accordingly.
         """
-
+        # TODO  更新慢事务
+        # TODO transaction  newrelic.core.transaction_node.TransactionNode
         slowest = 0
         name = transaction.path
 
@@ -911,7 +914,7 @@ class StatsEngine(object):
         """Check if transaction is a synthetics trace and save it to
         __synthetics_transactions.
         """
-
+        # TODO ?????
         settings = self.__settings
 
         if not transaction.synthetics_resource_id:
@@ -928,6 +931,9 @@ class StatsEngine(object):
         it for later.
 
         """
+        # TODO 记录事务，可以选择性是否记录事务的SQL解析
+        # TODO 当事务时间大于4倍的apdex_t,它就是慢事务
+        # TODO transaction  newrelic.core.transaction_node.TransactionNode
 
         if not self.__settings:
             return
@@ -977,7 +983,7 @@ class StatsEngine(object):
 
         # Capture any sql traces if transaction tracer enabled.
 
-        if settings.slow_sql.enabled and settings.collect_traces:
+        if settings.slow_sql.enabled and settings.collect_traces: # TODO 如果是慢SQL，记录成慢事务
             for node in transaction.slow_sql_nodes(self):
                 self.record_slow_sql_node(node)
 
@@ -1004,7 +1010,7 @@ class StatsEngine(object):
             if threshold is None:
                 threshold = transaction.apdex_t * 4
 
-            if transaction.duration >= threshold:
+            if transaction.duration >= threshold:# TODO 如果运行时间大于apdex_t的4倍，就要更新慢事务
                 self._update_slow_transaction(transaction)
 
         # Create the transaction event and add it to the
@@ -1029,7 +1035,7 @@ class StatsEngine(object):
 
         # Merge in span events
 
-        if (settings.distributed_tracing.enabled and transaction.sampled and
+        if (settings.distributed_tracing.enabled and transaction.sampled and # TODO 如果开启了分布式追踪，记录跨度事件
                 settings.span_events.enabled and settings.collect_span_events):
             for event in transaction.span_events(self.__settings):
                 self._span_events.add(event, priority=transaction.priority)
@@ -1045,6 +1051,7 @@ class StatsEngine(object):
         length 6.
 
         """
+        # TODO 获取指标数据
 
         if not self.__settings:
             return []
@@ -1098,6 +1105,7 @@ class StatsEngine(object):
         the reporting period.
 
         """
+        # TODO 获取错误信息
 
         if not self.__settings:
             return []
@@ -1105,6 +1113,7 @@ class StatsEngine(object):
         return self.__transaction_errors
 
     def slow_sql_data(self, connections):
+        # TODO 解析慢SQL数据，并保存API的traceback信息
 
         _logger.debug('Generating slow SQL data.')
 
@@ -1131,9 +1140,9 @@ class StatsEngine(object):
             params = slow_sql_node.params or {}
 
             if slow_sql_node.stack_trace:
-                params['backtrace'] = slow_sql_node.stack_trace
+                params['backtrace'] = slow_sql_node.stack_trace # TODO 导致慢SQL的请求栈信息
 
-            explain_plan_data = explain_plan(connections,
+            explain_plan_data = explain_plan(connections, # TODO 慢SQL解析??????,原理
                     slow_sql_node.statement,
                     slow_sql_node.connect_params,
                     slow_sql_node.cursor_params,
@@ -1192,6 +1201,7 @@ class StatsEngine(object):
         during the reporting period.
 
         """
+        # TODO 获取慢事务数据，逻辑??????
 
         _logger.debug('Generating transaction trace data.')
 
@@ -1203,10 +1213,12 @@ class StatsEngine(object):
         # This ensures we don't send duplicates of a transaction.
 
         traces = set()
+        # TODO 将各种事务合在一起，看有没有慢事务
         if self.__slow_transaction:
             traces.add(self.__slow_transaction)
         traces.update(self.__xray_transactions)
         traces.update(self.__synthetics_transactions)
+
 
         # Return an empty list if no transactions were captured.
 
@@ -1320,7 +1332,7 @@ class StatsEngine(object):
 
         # XXX This method no longer appears to be used. Being replaced
         # by the transaction_trace_data() method.
-
+        # TODO  慢事务数据
         if not self.__settings:
             return []
 
@@ -1549,6 +1561,7 @@ class StatsEngine(object):
         """Merges data from a single transaction. Snapshot is an instance of
         StatsEngine that contains stats for the single transaction.
         """
+        # TODO 合并来自单个事务的数据。 快照是包含单个交易统计信息的StatsEngine。为什么需要呢??????
 
         if not self.__settings:
             return
@@ -1744,6 +1757,9 @@ class StatsEngine(object):
 
 
 class StatsEngineSnapshot(StatsEngine):
+    """
+    # TODO 单个事务的统计信息
+    """
     def reset_transaction_events(self):
         self._transaction_events = None
 
