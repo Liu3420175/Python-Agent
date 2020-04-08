@@ -56,15 +56,15 @@ class Application(object):
 
         self._period_start = 0.0
 
-        self._active_session = None
+        self._active_session = None # TODO 应用会话，干嘛用的????newrelic.core.data_collector.ApplicationSession
         self._harvest_enabled = False # TODO 是否收集数据????
 
         self._transaction_count = 0 # TODO 监控事物次数
         self._last_transaction = 0.0
 
-        self.adaptive_sampler = None
+        self.adaptive_sampler = None # TODO 采集器，干嘛用的????? newrelic.core.adaptive_sampler.AdaptiveSampler
 
-        self._global_events_account = 0
+        self._global_events_account = 0 # TODO 全部事件个数
 
         self._harvest_count = 0  # TODO 收集次数
 
@@ -77,18 +77,18 @@ class Application(object):
         # TODO 那么event.wait 方法时便不再阻塞。Event其实就是一个简化版的 Condition。Event没有锁，无法使线程进入同步阻塞状态
         self._connected_event = threading.Event()
 
-        self._detect_deadlock = False
-        self._deadlock_event = threading.Event()
+        self._detect_deadlock = False # TODO  是否有死锁
+        self._deadlock_event = threading.Event() # TODO 死锁
 
         self._stats_lock = threading.RLock()
-        self._stats_engine = StatsEngine() # TODO 统计引擎，一个应用对应一个统计引擎
+        self._stats_engine = StatsEngine() # TODO 统计引擎，一个应用对应一个统计引擎，内置的一些事件统计引擎
 
         self._stats_custom_lock = threading.RLock()
-        self._stats_custom_engine = StatsEngine()
+        self._stats_custom_engine = StatsEngine() # TODO 用户自定义事件统计引擎
 
         self._agent_commands_lock = threading.Lock()
-        self._data_samplers_lock = threading.Lock()
-        self._data_samplers_started = False
+        self._data_samplers_lock = threading.Lock() # TODO　采样器锁
+        self._data_samplers_started = False # TODO 数据采样器是否启动
 
         # We setup empty rules engines here even though they will be
         # replaced when application first registered. This is done to
@@ -111,7 +111,7 @@ class Application(object):
         # self._xray_profiler = None
         self.xray_session_running = False
 
-        self.profile_manager = profile_session_manager()
+        self.profile_manager = profile_session_manager() # TODO 干嘛用的呢?????
 
         # This holds a dictionary of currently active xray sessions.
         # key = xray_id
@@ -131,13 +131,14 @@ class Application(object):
 
     @property
     def configuration(self):
-        return self._active_session and self._active_session.configuration
+        return self._active_session and self._active_session.configuration # TODO 会话配置，newrelic.core.data_collector.ApplicationSession
 
     @property
     def active(self):
         return self.configuration is not None
 
     def compute_sampled(self):
+        # TODO ?????
         if self.adaptive_sampler is None:
             return False
 
@@ -232,7 +233,7 @@ class Application(object):
 
         thread = threading.Thread(target=self.connect_to_data_collector,
                 name='NR-Activate-Session/%s' % self.name,
-                args=(activate_agent,))
+                args=(activate_agent,)) # TODO 这个守护线程完成数据上传的功能
         thread.setDaemon(True)
         thread.start()
 
@@ -307,7 +308,7 @@ class Application(object):
         # running. Such a deadlock state could occur where subsequent
         # code run from this thread performs a deferred module import.
 
-        if self._detect_deadlock:
+        if self._detect_deadlock: # TODO 如果存在死锁
             imp.acquire_lock()
             self._deadlock_event.set()
             imp.release_lock()
@@ -318,12 +319,14 @@ class Application(object):
         # failure to register we will try again, gradually backing off
         # for longer and longer periods as we retry. The retry interval
         # will be capped at 300 seconds.
+        # TODO 给应用注册一个数据收集器，使用create_session()造成的任何错误都会被处理。结果就是返回一个session对象或者None
+        # TODO 如果注册失败，会重试。重试间隔上限为300s
 
         active_session = None
 
         retries = [(15, False, False), (15, False, False),
                    (30, False, False), (60, True, False),
-                   (120, False, False), (300, False, True), ]
+                   (120, False, False), (300, False, True), ] # TODO 重试
 
         connect_attempts = 0
 
@@ -336,7 +339,7 @@ class Application(object):
                 if self._pending_shutdown:
                     return
 
-                connect_attempts += 1
+                connect_attempts += 1 # TODO 尝试注册次数
 
                 internal_metrics = CustomMetrics()
 
@@ -405,7 +408,7 @@ class Application(object):
                 # per schedule associated with the retry intervals.
 
                 if not active_session:
-                    if retries:
+                    if retries: # TODO 重试
                         timeout, warning, error = retries.pop(0)
 
                         if warning:
@@ -444,7 +447,7 @@ class Application(object):
                 self._stats_engine.reset_stats(configuration)
 
                 if configuration.serverless_mode.enabled:
-                    sampling_target_period = 60.0
+                    sampling_target_period = 60.0 # TODO 采集周期
                 else:
                     sampling_target_period = \
                         configuration.sampling_target_period_in_seconds
@@ -482,7 +485,7 @@ class Application(object):
                         self._period_start - connect_start)
                 internal_metric('Supportability/Python/Application/'
                         'Registration/Attempts',
-                        connect_attempts)
+                        connect_attempts) # TODO 上传数据
 
             self._stats_engine.merge_custom_metrics(
                     internal_metrics.metrics())
@@ -499,7 +502,7 @@ class Application(object):
             self._harvest_enabled = True
 
             if activate_agent:
-                activate_agent()
+                activate_agent() # TODO 激活代理
 
             # Flag that the session activation has completed to
             # anyone who has been waiting through calling the
@@ -533,7 +536,7 @@ class Application(object):
                         'support for further investigation.')
 
         try:
-            self._active_session.close_connection()
+            self._active_session.close_connection() # TODO 激活会话后，为啥还有关闭?????数据已经上传，每上传一次数据就要重建一次会话?????
         except:
             pass
 
@@ -613,6 +616,7 @@ class Application(object):
         for this application.
 
         """
+        # TODO 为应用创建一个与数据源对应的数据采集器
 
         _logger.debug('Register data source %r against application where '
                 'application=%r, name=%r, settings=%r and properties=%r.',
@@ -627,6 +631,7 @@ class Application(object):
         transactions commences.
 
         """
+        ## TODO 启动所有数据采集器
         with self._data_samplers_lock:
             _logger.debug('Starting data samplers for application %r.',
                     self._app_name)
@@ -654,7 +659,7 @@ class Application(object):
         shutdown.
 
         """
-
+        # TODO 关闭所有的数据采集器
         with self._data_samplers_lock:
             _logger.debug('Stopping data samplers for application %r.',
                     self._app_name)
@@ -675,6 +680,7 @@ class Application(object):
                             data_sampler.name)
 
     def remove_data_source(self, name):
+        # TODO 移除某个数据源，就是简单的列表查找，列表删除操作
         with self._data_samplers_lock:
 
             data_sampler = [x for x in self._data_samplers if x.name == name]
@@ -709,7 +715,7 @@ class Application(object):
         of a specific transaction.
 
         """
-
+        # TODO 统计器记录异常
         if not self._active_session:
             return
 
@@ -735,7 +741,7 @@ class Application(object):
         additional locking will be required.
 
         """
-
+        # TODO 统计器记录自定义数据指标
         if not self._active_session:
             return
 
@@ -765,6 +771,7 @@ class Application(object):
                 self._stats_custom_engine.record_custom_metric(name, value)
 
     def record_custom_event(self, event_type, params):
+        # TODO 记录自定义事件详情(比如自带数参数等等)
         if not self._active_session:
             return
 

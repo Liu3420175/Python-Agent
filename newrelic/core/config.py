@@ -274,7 +274,7 @@ _settings.transaction_segments = TransactionSegmentSettings()
 _settings.transaction_segments.attributes = \
         TransactionSegmentAttributesSettings()
 _settings.distributed_tracing = DistributedTracingSettings()
-_settings.serverless_mode = ServerlessModeSettings()
+_settings.serverless_mode = ServerlessModeSettings() # TODO 无服务模式配置信息
 _settings.event_harvest_config = EventHarvestConfigSettings()
 _settings.event_harvest_config.harvest_limits = \
         EventHarvestConfigHarvestLimitSettings()
@@ -513,7 +513,7 @@ _settings.js_agent_loader = None
 _settings.js_agent_file = None
 
 _settings.url_rules = []
-_settings.metric_name_rules = []
+_settings.metric_name_rules = [] # TODO 指标名称规则
 _settings.transaction_name_rules = []
 _settings.transaction_segment_terms = []
 

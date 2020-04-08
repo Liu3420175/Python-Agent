@@ -6,6 +6,7 @@ from newrelic.core.attribute import (check_name_is_string, check_name_length,
         process_user_attribute, NameIsNotStringException, NameTooLongException,
         MAX_NUM_USER_ATTRIBUTES)
 
+# TODO 自定义相关事件相关信息
 
 _logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def process_event_type(name):
           NONE, if name isn't.
 
     """
-
+    # TODO 校验自定义事件类型名称是否合法
     FAILED_RESULT = None
 
     try:
@@ -75,7 +76,7 @@ def create_custom_event(event_type, params):
         None, if not successful.
 
     """
-
+    # TODO 创建一个有效的自定义事件
     name = process_event_type(event_type)
 
     if name is None:

@@ -22,7 +22,7 @@ except ImportError:
 
 _logger = logging.getLogger(__name__)
 
-AGENT_PACKAGE_DIRECTORY = os.path.dirname(newrelic.__file__) + '/'
+AGENT_PACKAGE_DIRECTORY = os.path.dirname(newrelic.__file__) + '/' #TODO 代理根目录
 
 
 class SessionState(object):
@@ -124,7 +124,7 @@ class ProfileSessionManager(object):
     """
     _lock = threading.Lock()
     _instance = None
-
+    #TODO 线程安全的情况下单例
     @staticmethod
     def singleton():
         with ProfileSessionManager._lock:

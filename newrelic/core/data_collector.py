@@ -722,7 +722,7 @@ class ApplicationSession(object):
         self.agent_run_id = configuration.agent_run_id
         self.request_headers_map = configuration.request_headers_map
 
-        self._requests_session = None
+        self._requests_session = None # http 会话
 
     @property
     def requests_session(self):

@@ -81,6 +81,7 @@ class ApdexStats(list):
 
     def merge_apdex_metric(self, metric):
         """Merge data from an apdex metric object."""
+        # TODO newrelic.core.metric.ApdexMetric
 
         self[0] += metric.satisfying
         self[1] += metric.tolerating
@@ -143,7 +144,7 @@ class TimeStats(list):
 
     def merge_raw_time_metric(self, duration, exclusive=None):
         """Merge time value."""
-        # TODO 将一个时间值直接合并到统计器里
+        # TODO 将一个时间值直接合并到统计器里，duration和exclusive是newrelic.core.metric.TimeMetric的属性
         if exclusive is None:
             exclusive = duration
 
@@ -160,7 +161,7 @@ class TimeStats(list):
 
     def merge_time_metric(self, metric):
         """Merge data from a time metric object."""
-        # TODO metric是啥??????
+        # TODO metric  newrelic.core.metric.TimeMetric
 
         self.merge_raw_time_metric(metric.duration, metric.exclusive)
 
@@ -500,7 +501,7 @@ class StatsEngine(object):
         from prior apdex metrics with the same name.
 
         """
-        # TODO 记录Apdex指标， metric是啥???
+        # TODO 记录Apdex指标， metric是啥，newrelic.core.metric.ApdexMetric,是一个命名元组
 
         if not self.__settings:
             return
@@ -538,7 +539,7 @@ class StatsEngine(object):
         from prior time metrics with the same name and scope.
 
         """
-        # TODO 记录时间指标， metric是啥???
+        # TODO 记录时间指标， metric是啥，newrelic.core.metric.TimeMetric,
 
         if not self.__settings:
             return
@@ -769,7 +770,7 @@ class StatsEngine(object):
         return error_event
 
     def record_custom_event(self, event):
-        # TODO 记录自定义事务
+        # TODO 记录自定义事件详情(比如参数等等)，SDK是准许用户自定义事件
 
         settings = self.__settings
 

@@ -22,6 +22,7 @@ class NormalizationRule(_NormalizationRule):
 
 
 class RulesEngine(object):
+    # TODO 规则引擎
 
     def __init__(self, rules):
         self.__rules = []
@@ -29,7 +30,7 @@ class RulesEngine(object):
         for rule in rules:
             kwargs = {}
             for name in map(str, rule.keys()):
-                if name in NormalizationRule._fields:
+                if name in NormalizationRule._fields:# TODO _fields获取命名元组的字段列表
                     kwargs[name] = rule[name]
             self.__rules.append(NormalizationRule(**kwargs))
 
