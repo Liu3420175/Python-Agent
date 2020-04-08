@@ -1,6 +1,7 @@
 """Utility functions for calculating URLs of data collector and proxes.
 
 """
+# TODO 用于返回数据收集器的代理URL
 
 try:
     import urlparse
@@ -60,7 +61,7 @@ def proxy_details(proxy_scheme, proxy_host, proxy_port, proxy_user,
             netloc = '%s:%s@%s' % (proxy_user, proxy_pass, netloc)
         else:
             netloc = '%s@%s' % (proxy_user, netloc)
-
+    # TODO requests包的代理需要使用HTTP Basic Auth，可以使用 http://user:password@host/ 语法
     if proxy_scheme is None:
         proxy_scheme = 'http'
 

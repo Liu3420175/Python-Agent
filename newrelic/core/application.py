@@ -60,7 +60,7 @@ class Application(object):
         self._harvest_enabled = False # TODO 是否收集数据????
 
         self._transaction_count = 0 # TODO 监控事物次数
-        self._last_transaction = 0.0
+        self._last_transaction = 0.0 # TODO 最新事物时间戳
 
         self.adaptive_sampler = None # TODO 采集器，干嘛用的????? newrelic.core.adaptive_sampler.AdaptiveSampler
 
@@ -789,7 +789,7 @@ class Application(object):
 
     def record_transaction(self, data, profile_samples=None):
         """Record a single transaction against this application."""
-
+        # TODO data newrelic.core.transaction_node.TransactionNode
         if not self._active_session:
             return
 
@@ -814,7 +814,7 @@ class Application(object):
         # Do checks to see whether trying to record a transaction in a
         # different process to that the application was activated in.
 
-        self.validate_process()
+        self.validate_process() # TODO 校验进程是否一致
 
         internal_metrics = CustomMetrics()
 

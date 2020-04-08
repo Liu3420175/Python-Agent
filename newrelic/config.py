@@ -2778,7 +2778,6 @@ def initialize(config_file=None, environment=None, ignore_errors=None,
 
     _load_configuration(config_file, environment, ignore_errors,
             log_file, log_level) # TODO 加载并解析配置文件内容，这句也翻译了为啥将NEW_RELIC_ENVIRONMENT放在ini文件里无效，可以改源码
-
     if _settings.monitor_mode or _settings.developer_mode:# TODO 如果没有开启监控模式或者是开发者模式，不启动钩子
         _settings.enabled = True
         _setup_instrumentation() # TODO 注册在应用中自定义的钩子。也就是说newrelic允许用户在应用里自定义钩子，然后绑定

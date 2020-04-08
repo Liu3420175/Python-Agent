@@ -448,9 +448,9 @@ _settings.host = os.environ.get('NEW_RELIC_HOST',
         default_host(_settings.license_key))
 _settings.port = int(os.environ.get('NEW_RELIC_PORT', '0'))
 
-_settings.agent_run_id = None
+_settings.agent_run_id = None # TODO agent_run_id从newrelic服务端获取
 _settings.entity_guid = None
-_settings.request_headers_map = {}
+_settings.request_headers_map = {} # TODO 额外需要传递的请求头信息
 
 _settings.proxy_scheme = os.environ.get('NEW_RELIC_PROXY_SCHEME', None)
 _settings.proxy_host = os.environ.get('NEW_RELIC_PROXY_HOST', None)
@@ -458,7 +458,7 @@ _settings.proxy_port = int(os.environ.get('NEW_RELIC_PROXY_PORT', '0'))
 _settings.proxy_user = os.environ.get('NEW_RELIC_PROXY_USER', None)
 _settings.proxy_pass = os.environ.get('NEW_RELIC_PROXY_PASS', None)
 
-_settings.ca_bundle_path = os.environ.get('NEW_RELIC_CA_BUNDLE_PATH', None)
+_settings.ca_bundle_path = os.environ.get('NEW_RELIC_CA_BUNDLE_PATH', None) # TODO CA证书地址
 
 _settings.app_name = os.environ.get('NEW_RELIC_APP_NAME', 'Python Application')
 _settings.linked_applications = []
@@ -504,6 +504,7 @@ _settings.startup_timeout = float(
 _settings.shutdown_timeout = float(
        os.environ.get('NEW_RELIC_SHUTDOWN_TIMEOUT', '2.5'))
 
+# TODO 与浏览器js有关，基本可以去掉
 _settings.beacon = None
 _settings.error_beacon = None
 _settings.application_id = None
@@ -582,6 +583,7 @@ _settings.error_collector.attributes.enabled = True
 _settings.error_collector.attributes.exclude = []
 _settings.error_collector.attributes.include = []
 
+# TODO 浏览器监控问题，移除掉!!!!!
 _settings.browser_monitoring.enabled = True
 _settings.browser_monitoring.auto_instrument = True
 _settings.browser_monitoring.loader = 'rum'  # Valid values: 'full', 'none'
@@ -894,7 +896,7 @@ def apply_server_side_settings(server_side_config={}, settings=_settings):
     >>> settings_snapshot = apply_server_side_settings(server_config)
 
     """
-    # TODO 服务端添加配置变量, 通过web界面操作配置信息然后添加过滤，再覆盖
+    # TODO 服务端添加配置变量, 通过web界面操作配置信息然后添加过滤，再覆盖配置文件配置
 
     settings_snapshot = copy.deepcopy(settings) # TODO _settings 是Setting对象
 
@@ -962,6 +964,7 @@ def finalize_application_settings(server_side_config={}, settings=_settings):
 
     # Remove values from server_config that should not overwrite the
     # ones set locally
+    # TODO 完成应用的setting组合，服务端配置覆盖配置文件配置，添加属性过滤器，并返回最终的应用配置对象!!!!!!
     server_side_config = _remove_ignored_configs(server_side_config)
 
     application_settings = apply_server_side_settings(

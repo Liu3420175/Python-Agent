@@ -128,7 +128,7 @@ def connection_type(proxies):
     """Returns a string describing the connection type for use in metrics.
 
     """
-
+    # TODO  连接类型
     request_scheme = 'https'
 
     if proxies is None:
@@ -221,6 +221,7 @@ _audit_log_id = 0
 
 
 def _log_request(url, params, headers, data):
+    # TODO 每次发送数据时请求的日志
     settings = global_settings()
 
     if not settings.audit_log_file:
@@ -330,8 +331,10 @@ _deflate_exclude_list = set(['transaction_sample_data', 'sql_trace_data',
 
 def send_request(session, url, method, license_key, agent_run_id=None,
         request_headers_map=None, payload=(), max_payload_size_in_bytes=None):
+    # TODO max_payload_size_in_bytes 最大发送数据
+    # TODO method 不是指请求方式，只newrelic后端的方法
     """Constructs and sends a request to the data collector."""
-
+    # TODO 通过会话发送数据
     params = {}
     headers = {}
 
@@ -361,7 +364,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
 
     # Set up definitions for proxy server in case that has been set.
 
-    proxies = proxy_server()
+    proxies = proxy_server() # TODO  获取代理服务
 
     # At this time we use JSON content encoding for the data being sent.
     # If an error does occur when encoding the JSON, then it isn't
@@ -397,7 +400,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
 
     threshold = settings.agent_limits.data_compression_threshold
 
-    if method not in _deflate_exclude_list and len(data) > threshold:
+    if method not in _deflate_exclude_list and len(data) > threshold: # TODO 超过压缩阈值，压缩数据
         level = settings.agent_limits.data_compression_level
         level = level or zlib.Z_DEFAULT_COMPRESSION
         wbits = 31 if settings.compressed_content_encoding == 'gzip' else 15
@@ -416,7 +419,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
     # requests create one now. We want to close this as soon as we
     # are done with it.
 
-    auto_close_session = False
+    auto_close_session = False # TODO 是否自动关闭会话
 
     if not session:
         session = requests.session()
@@ -434,7 +437,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
 
     # If audit logging is enabled, log the requests details.
 
-    log_id = _log_request(url, params, headers, data)
+    log_id = _log_request(url, params, headers, data) # TODO 获取审计日志的日志文件id，可能是None
 
     max_payload_size_in_bytes = (max_payload_size_in_bytes or
             settings.max_payload_size_in_bytes)
@@ -468,7 +471,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
 
             r = session.post(url, params=params, headers=headers,
                     proxies=proxies, timeout=timeout, data=data,
-                    verify=cert_loc)
+                    verify=cert_loc) # TODO SSL 验证
 
         # Read the content now so we can force close the socket
         # connection if this is a transient session as quickly
@@ -663,7 +666,7 @@ def apply_high_security_mode_fixups(local_settings, server_settings):
     # represent how the settings were previously overridden for high
     # security mode. Those in 'agent_config' correspond to server side
     # configuration as set by the user.
-
+    # TODO 如果本地设置设置了高安全模式，就要删除一些与安全有关的配置信息
     if not local_settings['high_security']:
         return server_settings
 
@@ -727,6 +730,10 @@ class ApplicationSession(object):
     @property
     def requests_session(self):
         if self._requests_session is None:
+            # TODO 会话对象让你能够跨请求保持某些参数。它也会在同一个 Session 实例发出的所有请求之间保持 cookie，
+            # TODO 期间使用 urllib3 的 connection pooling 功能。所以如果你向同一主机发送多个请求，
+            #  TODO 底层的 TCP 连接将会被重用，从而带来显著的性能提升
+            # TODO requests.get用的也是会话，只是它在每次得到响应后会主动关闭会话(可以分析源码)，不适合向同一个主机发送多次请求这种场景
             self._requests_session = requests.session()
         return self._requests_session
 
@@ -745,7 +752,7 @@ class ApplicationSession(object):
             max_payload_size_in_bytes=None):
         return send_request(session, url, method, license_key,
             agent_run_id, request_headers_map, payload,
-            max_payload_size_in_bytes)
+            max_payload_size_in_bytes) # TODO 很好理解
 
     def agent_settings(self, settings):
         """Called to report up agent settings after registration.
@@ -772,7 +779,7 @@ class ApplicationSession(object):
 
         result = self.send_request(self.requests_session, self.collector_url,
                 'shutdown', self.license_key, self.agent_run_id,
-                self.request_headers_map)
+                self.request_headers_map) # TODO 发送关闭会话的命令
 
         _logger.info('Successfully shutdown New Relic Python agent '
                 'where app_name=%r, pid=%r, and agent_run_id=%r',
@@ -794,7 +801,7 @@ class ApplicationSession(object):
         return self.send_request(self.requests_session, self.collector_url,
                 'metric_data', self.license_key, self.agent_run_id,
                 self.request_headers_map, payload,
-                self.max_payload_size_in_bytes)
+                self.max_payload_size_in_bytes) # TODO 发送指标数据
 
     def send_errors(self, errors):
         """Called to submit errors. The errors should be an iterable
@@ -814,7 +821,7 @@ class ApplicationSession(object):
         return self.send_request(self.requests_session, self.collector_url,
                 'error_data', self.license_key, self.agent_run_id,
                 self.request_headers_map, payload,
-                self.max_payload_size_in_bytes)
+                self.max_payload_size_in_bytes) # TODO 发送错误数据
 
     def send_transaction_traces(self, transaction_traces):
         """Called to submit transaction traces. The transaction traces
@@ -834,7 +841,7 @@ class ApplicationSession(object):
         return self.send_request(self.requests_session, self.collector_url,
                 'transaction_sample_data', self.license_key,
                 self.agent_run_id, self.request_headers_map, payload,
-                self.max_payload_size_in_bytes)
+                self.max_payload_size_in_bytes) # TODO 发送事物链路数据
 
     def send_profile_data(self, profile_data):
         """Called to submit Profile Data.
@@ -1012,7 +1019,7 @@ class ApplicationSession(object):
             url = collector_url(redirect_host)
 
             server_config = cls.send_request(None, url, 'connect',
-                    license_key, None, None, payload)
+                    license_key, None, None, payload) # TODO 获取服务端配置。agent_run_id从服务端获取
 
             # Apply High Security Mode to server_config, so the local
             # security settings won't get overwritten when we overlay
