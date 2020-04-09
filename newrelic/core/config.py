@@ -525,8 +525,8 @@ _settings.primary_application_id = \
 _settings.trusted_account_ids = []
 _settings.trusted_account_key = os.environ.get('NEW_RELIC_TRUSTED_ACCOUNT_KEY')
 _settings.encoding_key = None
-_settings.sampling_target = 10
-_settings.sampling_target_period_in_seconds = 60
+_settings.sampling_target = 10 # TODO 采集点数
+_settings.sampling_target_period_in_seconds = 60 # TODO 采集周期，结合上面，就是6秒采样一次
 
 _settings.compressed_content_encoding = 'gzip'
 _settings.max_payload_size_in_bytes = 1000000
@@ -535,7 +535,7 @@ _settings.attributes.enabled = True
 _settings.attributes.exclude = []
 _settings.attributes.include = []
 
-_settings.thread_profiler.enabled = True
+_settings.thread_profiler.enabled = True # TODO 是否开启线程分析器， 线程分析器将为应用程序中的每个活动线程定期捕获调用堆栈的快照
 _settings.cross_application_tracer.enabled = True
 _settings.xray_session.enabled = True
 
@@ -769,7 +769,7 @@ def global_settings_dump(settings_object=None):
     global settings configuration back to core application.
 
     """
-    # TODO 获取全局settings，settings_object是Settings类对象
+    # TODO 获取全局settings，并将其转换成字典，settings_object是Settings类对象
 
     if settings_object is None:
         settings_object = _settings

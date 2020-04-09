@@ -47,6 +47,14 @@ def c2t(count=0, total=0.0, min=0.0, max=0.0, sum_of_squares=0.0):
 
 class ApdexStats(list):
     # TODO 用于累计apdex 指标的桶，我们知道apdex默认值是0.5,可以通过配置来决定是否开启动态变化的功能
+    # TODO Apdex(ApplicationPerformanceIndex) 是由Apdex联盟制定的国际应用性能指数标准，用来量化用户对应用性能的满意程度。
+    # TODO Apdex定义了3个用户的满意度区间，即
+    # TODO |满意程度| 阈值 | 评分 |
+    # TODO | 满意 | < T  | 1.0 |
+    # TODO |容忍 |T~4T   |  0.5|
+    # TODO |失望 |> 4T  | 0 |
+    # TODO 其中，T为用户自定义的响应时间阈值。Apdex指数 = (1.0 * 满意样本数 + 0.5 * 容忍样本数) / 样本总数。
+    # TODO 这样，抽象的应用性能满意度被量化为0、1之间的数值（0代表没有满意用户，1则代表所有用户都满意）
 
     """Bucket for accumulating apdex metrics.
 

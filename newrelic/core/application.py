@@ -62,7 +62,7 @@ class Application(object):
         self._transaction_count = 0 # TODO 监控事物次数
         self._last_transaction = 0.0 # TODO 最新事物时间戳
 
-        self.adaptive_sampler = None # TODO 采集器，干嘛用的????? newrelic.core.adaptive_sampler.AdaptiveSampler
+        self.adaptive_sampler = None # TODO 采样器，记录采样次数采样频率等信息，为什么需要这个???? newrelic.core.adaptive_sampler.AdaptiveSampler
 
         self._global_events_account = 0 # TODO 全部事件个数
 
@@ -585,6 +585,7 @@ class Application(object):
         rule type to the supplied name.
 
         """
+        # TODO 统一化命名
 
         if not self._active_session:
             return name, False
@@ -845,6 +846,7 @@ class Application(object):
                         self._stats_engine.xray_sessions)):
 
                     try:
+                        # TODO 非Web 事务
                         background_task, samples = profile_samples
 
                         tr_type = 'BACKGROUND' if background_task else 'REQUEST'
@@ -1262,6 +1264,7 @@ class Application(object):
                 # this is done so that any new metrics that come in from
                 # this point onwards will be accumulated in a fresh
                 # bucket.
+                # TODO 为事务统计和自定义指标统计创建一个快照
 
                 _logger.debug('Snapshotting metrics for harvest of %r.',
                         self._app_name)
@@ -1274,7 +1277,7 @@ class Application(object):
 
                     self._last_transaction = 0.0
 
-                    stats = self._stats_engine.harvest_snapshot(flexible)
+                    stats = self._stats_engine.harvest_snapshot(flexible) # TODO 创建快照
 
                 if not flexible:
                     with self._stats_custom_lock:

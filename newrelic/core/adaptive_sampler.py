@@ -2,9 +2,14 @@ import random
 import time
 import threading
 
-
+# TODO 这个类起啥作用?????
 class AdaptiveSampler(object):
     def __init__(self, sampling_target, sampling_period):
+        """
+
+        :param sampling_target:  # TODO 采样点数
+        :param sampling_period:  # TODO 采样周期
+        """
         self.adaptive_target = 0.0
         self.period = sampling_period
         self.last_reset = time.time()
@@ -30,6 +35,7 @@ class AdaptiveSampler(object):
                 self._reset()
 
     def compute_sampled(self):
+        # TODO 计算采样
         with self._lock:
             self.reset_if_required()
             if self.sampled_count >= self.max_sampled:

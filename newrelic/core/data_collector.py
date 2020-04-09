@@ -85,7 +85,7 @@ def collector_url(server=None):
     in an agent session should be sent to.
 
     """
-
+    # TODO 发送数据的URL
     settings = global_settings()
 
     url = '%s://%s/agent_listener/invoke_raw_method'
@@ -332,7 +332,8 @@ _deflate_exclude_list = set(['transaction_sample_data', 'sql_trace_data',
 def send_request(session, url, method, license_key, agent_run_id=None,
         request_headers_map=None, payload=(), max_payload_size_in_bytes=None):
     # TODO max_payload_size_in_bytes 最大发送数据
-    # TODO method 不是指请求方式，只newrelic后端的方法
+    # TODO method 不是指请求方式，指newrelic后端的方法
+    # TODO 不同的method，newrelic后端处理方式(存储数据的方式)不一样。我们这边只需要定义好数据结构后直接上传到一个存储服务里即可
     """Constructs and sends a request to the data collector."""
     # TODO 通过会话发送数据
     params = {}
@@ -666,6 +667,7 @@ def apply_high_security_mode_fixups(local_settings, server_settings):
     # represent how the settings were previously overridden for high
     # security mode. Those in 'agent_config' correspond to server side
     # configuration as set by the user.
+    # TODO  整理高安全模式数据
     # TODO 如果本地设置设置了高安全模式，就要删除一些与安全有关的配置信息
     if not local_settings['high_security']:
         return server_settings
@@ -1001,7 +1003,7 @@ class ApplicationSession(object):
 
             result = cls.send_request(None, url,
                     'preconnect', license_key)
-            redirect_host = result['redirect_host']
+            redirect_host = result['redirect_host'] # TODO newrelic接口返回值里的带的
 
             # Then we perform a connect to the actual data collector host
             # we need to use. All communications after this point should go
@@ -1014,7 +1016,7 @@ class ApplicationSession(object):
             # that keep alive is effective.
 
             payload = cls._create_connect_payload(app_name,
-                    linked_applications, environment, settings)
+                    linked_applications, environment, settings) # TODO 在初始连接上创建负载，有啥用?????
 
             url = collector_url(redirect_host)
 
@@ -1066,7 +1068,7 @@ class ApplicationSession(object):
 
             session = cls(url, license_key, application_config)
 
-            duration = time.time() - start
+            duration = time.time() - start # TODO 记录创建示例所需时间
 
             # Log successful agent registration and any server side messages.
 
@@ -1269,6 +1271,7 @@ _developer_mode_responses = {
 
 
 class DeveloperModeSession(ApplicationSession):
+    # TODO 开发者模式，没有与NewRelic服务进行交互，方法和返回值都是用_developer_mode_responses里的值
 
     @classmethod
     def send_request(cls, session, url, method, license_key,
@@ -1414,7 +1417,7 @@ class ServerlessModeSession(ApplicationSession):
 
 def create_session(license_key, app_name, linked_applications,
         environment, settings):
-
+     # TODO 创建会话
     _global_settings = global_settings()
 
     if _global_settings.serverless_mode.enabled:

@@ -24,13 +24,16 @@ _logger = logging.getLogger(__name__)
 
 AGENT_PACKAGE_DIRECTORY = os.path.dirname(newrelic.__file__) + '/' #TODO 代理根目录
 
+# TODO 线程分析器，线程分析会话，监控线程的
 
 class SessionState(object):
+    # TODO 会话状态
     RUNNING = 1
     FINISHED = 2
 
 
 class SessionType(object):
+    # TODO 会话类型
     GENERIC = 1
     XRAY = 2
 
@@ -138,7 +141,7 @@ class ProfileSessionManager(object):
 
         # Name of the application that requested the full_profile session.
 
-        self.full_profile_app = None
+        self.full_profile_app = None # TODO 请求分线器的应用名称
 
         # Dict with app_name as key and another dictionary (let's call it child
         # dictionary) as value. The child dictionary has key_txn name as key
@@ -461,14 +464,14 @@ class ProfileSession(object):
         self.profile_id = profile_id
         self.start_time_s = time.time()
         self.stop_time_s = stop_time
-        self.actual_stop_time_s = 0
+        self.actual_stop_time_s = 0 # TODo 实际停止时间
         self.xray_id = xray_id
         self.key_txn = key_txn
         if self.xray_id is None:
-            self.profiler_type = SessionType.GENERIC
+            self.profiler_type = SessionType.GENERIC # TODO 分析器类型
         else:
             self.profiler_type = SessionType.XRAY
-        self.state = SessionState.RUNNING
+        self.state = SessionState.RUNNING # TODO 状态
         self.reset_profile_data()
 
     def reset_profile_data(self):
