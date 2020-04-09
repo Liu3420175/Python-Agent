@@ -192,7 +192,7 @@ class Agent(object):
         self._applications = {} # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
         self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
 
-        self._harvest_thread = threading.Thread(target=self._harvest_loop, # TODO 收集线程，循环收集，是守护线程
+        self._harvest_thread = threading.Thread(target=self._harvest_loop, # TODO 收集线程，是守护线程，_harvest_loop是一个时间调度起，可以执行定时任务
                 name='NR-Harvest-Thread')
         self._harvest_thread.setDaemon(True) # TODO 设置为守护线程
         self._harvest_shutdown = threading.Event() # TODO 信号标志，用于线程间通信，将内部标志设置为true。 所有等待它成为真正的线程都被唤醒
@@ -670,6 +670,7 @@ class Agent(object):
 
     def activate_agent(self):
         """Starts the main background for the agent."""
+        # TODO 激活代理的过程中会完成收集线程的启动。收集线程启动时会启动_harvest_loop里的时间调度器
         with Agent._instance_lock:
             # Skip this if agent is not actually enabled.
             if not self._config.enabled:
