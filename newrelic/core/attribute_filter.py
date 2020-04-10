@@ -60,7 +60,10 @@ class AttributeFilter(object):
     # TODO 为属性申请过滤规则
     # TODO 当初始化后，一个AttributeFilter对象会获取所有与setting有关的属性，并且将它们转换成一个有序的元组对象AttributeFilterRules
     # TODO 在代理注册期间，单个AttributeFilter会被创建并且在代理的生命周期里一直保存不变，更改setting/rule属性需要重启代理
-    # TODO 一个属性可能有多个目的地
+    # TODO 一个属性可能有多个目的地,因为有的地方收集的属性相同,公用的话可以节省空间提高效率
+    # TODO {'enabled_destinations': 55,                    开启了属性收集的地方
+    #  'rules': (),                                        规则
+    #  'cache': {('enable', 4): 4, ('include', 4): 4}}     缓存
     def __init__(self, flattened_settings):
         """
 

@@ -1,4 +1,4 @@
-# TODO 处理熟悉参数的模块
+# TODO 处理配置属性,里面包含一些校验规则等
 import logging
 
 from collections import namedtuple
@@ -29,7 +29,7 @@ _DESTINATIONS_WITH_EVENTS = (_DESTINATIONS |
                              DST_SPAN_EVENTS)
 
 # The following subset goes to transaction events by default.
-
+# TODO 事物时间默认的属性名称
 _TRANSACTION_EVENT_DEFAULT_ATTRIBUTES = set((
         'host.displayName',
         'request.method',
@@ -59,20 +59,23 @@ _TRANSACTION_EVENT_DEFAULT_ATTRIBUTES = set((
         'peer.address',
 ))
 
-MAX_NUM_USER_ATTRIBUTES = 64
-MAX_ATTRIBUTE_LENGTH = 255
+MAX_NUM_USER_ATTRIBUTES = 64  # TODO 最大拥有属性的个数
+MAX_ATTRIBUTE_LENGTH = 255 # TODO 属性长度
 MAX_64_BIT_INT = 2 ** 63 - 1
 
 
 class NameTooLongException(Exception):
+    # TODO 名字太长
     pass
 
 
 class NameIsNotStringException(Exception):
+    # TODO 名字不是字符串
     pass
 
 
 class IntTooLargeException(Exception):
+    # TODO 整数太大
     pass
 
 
@@ -89,6 +92,7 @@ class Attribute(_Attribute):
 
 
 def create_attributes(attr_dict, destinations, attribute_filter):
+
     attributes = []
 
     for k, v in attr_dict.items():
