@@ -1,5 +1,17 @@
 # Attribute "destinations" represented as bitfields.
+# TODO 属性是键值对
+# TODO 可以通过多种方式收集属性：
+# TODO 邮件属性：这些是在从队列或主题接收的邮件上设置的属性。
+# TODO HTTP请求属性：这些是HTTP请求的参数。
+# TODO 用户属性：这些是用户通过每个代理的API提供的属性。
+# TODO 代理属性：这些是座席捕获的属性。 例如，httpResponseCode和httpResponseMessage。
+# TODO 通过属性，我们能获取更详情的信息
 
+# TODO NewRelic上报的数据有多种数据结构，不是所有的功能块都能查看属性，所有要把属性和功能块绑定起来，也就是目的地
+# TODO https://docs.newrelic.com/docs/agents/manage-apm-agents/agent-data/agent-attributes
+
+# TODO 配置文件里的attribute的目的地
+# TODO
 DST_NONE = 0x0
 DST_ALL  = 0x3F
 DST_TRANSACTION_EVENTS   = 1 << 0
@@ -8,6 +20,8 @@ DST_ERROR_COLLECTOR      = 1 << 2
 DST_BROWSER_MONITORING   = 1 << 3
 DST_SPAN_EVENTS          = 1 << 4
 DST_TRANSACTION_SEGMENTS = 1 << 5
+
+# TODO 通过用位域的方式来查了哪些目的地启动了收集属性功能
 
 class AttributeFilter(object):
 
@@ -43,9 +57,16 @@ class AttributeFilter(object):
     #      the bitfield.
     #
     #   4. Return the resulting bitfield after all rules have been applied.
-
+    # TODO 为属性申请过滤规则
+    # TODO 当初始化后，一个AttributeFilter对象会获取所有与setting有关的属性，并且将它们转换成一个有序的元组对象AttributeFilterRules
+    # TODO 在代理注册期间，单个AttributeFilter会被创建并且在代理的生命周期里一直保存不变，更改setting/rule属性需要重启代理
+    # TODO 一个属性可能有多个目的地
     def __init__(self, flattened_settings):
+        """
 
+        :param flattened_settings:  # TODO 初始化后的setting,是个字典对象
+        """
+        # TODO enabled_destinations 通过位域的方式来确定有哪些地方要收集属性，上面的DST_*定义就定位了目的地和位的关系
         self.enabled_destinations = self._set_enabled_destinations(flattened_settings)
         self.rules = self._build_rules(flattened_settings)
         self.cache = {}
@@ -93,17 +114,17 @@ class AttributeFilter(object):
         #   3. Boolean that represents whether the setting is an "include" or not.
 
         rule_templates = (
-            ('attributes.include', DST_ALL, True),
+            ('attributes.include', DST_ALL, True), # TODO 全局
             ('attributes.exclude', DST_ALL, False),
-            ('transaction_events.attributes.include', DST_TRANSACTION_EVENTS, True),
+            ('transaction_events.attributes.include', DST_TRANSACTION_EVENTS, True), # TODO 事物事件
             ('transaction_events.attributes.exclude', DST_TRANSACTION_EVENTS, False),
-            ('transaction_tracer.attributes.include', DST_TRANSACTION_TRACER, True),
+            ('transaction_tracer.attributes.include', DST_TRANSACTION_TRACER, True), # TODO 事物Tracer
             ('transaction_tracer.attributes.exclude', DST_TRANSACTION_TRACER, False),
-            ('error_collector.attributes.include', DST_ERROR_COLLECTOR, True),
+            ('error_collector.attributes.include', DST_ERROR_COLLECTOR, True),  # TODO 错误收集器
             ('error_collector.attributes.exclude', DST_ERROR_COLLECTOR, False),
-            ('browser_monitoring.attributes.include', DST_BROWSER_MONITORING, True),
+            ('browser_monitoring.attributes.include', DST_BROWSER_MONITORING, True),  # TODO 浏览器监控
             ('browser_monitoring.attributes.exclude', DST_BROWSER_MONITORING, False),
-            ('span_events.attributes.include', DST_SPAN_EVENTS, True),
+            ('span_events.attributes.include', DST_SPAN_EVENTS, True),  # TODO 跨度事物
             ('span_events.attributes.exclude', DST_SPAN_EVENTS, False),
             ('transaction_segments.attributes.include', DST_TRANSACTION_SEGMENTS, True),
             ('transaction_segments.attributes.exclude', DST_TRANSACTION_SEGMENTS, False),
@@ -149,7 +170,7 @@ class AttributeFilterRule(object):
         self.name = name.rstrip('*')
         self.destinations = destinations
         self.is_include = is_include
-        self.is_wildcard = name.endswith('*')
+        self.is_wildcard = name.endswith('*') # TODO 是否有通配符
 
     def _as_sortable(self):
 

@@ -212,6 +212,7 @@ def process_user_attribute(
     # If any of these checks fail, they will raise an exception, so we
     # log a message, and return (None, None).
     # TODO 处理用户属性名和值，属性值最大长度255，不过可更改
+    # TODO 对不合法的属性名要进行校验
     FAILED_RESULT = (None, None)
 
     try:
@@ -260,6 +261,7 @@ def process_user_attribute(
 
 
 def sanitize(value):
+    # TODO 归一化数据，如果是支持的数据类型，直接返回原值，否则转换成字符串
 
     # Return value unchanged, if it's a valid type that is supported by
     # Insights. Otherwise, convert value to a string.
