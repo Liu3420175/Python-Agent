@@ -23,6 +23,7 @@ DST_TRANSACTION_SEGMENTS = 1 << 5
 
 # TODO 通过用位域的方式来查了哪些目的地启动了收集属性功能,这种设计方法很好
 
+
 class AttributeFilter(object):
 
     # Apply filtering rules to attributes.
