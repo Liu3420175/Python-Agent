@@ -106,8 +106,8 @@ class Agent(object):
 
     _instance_lock = threading.Lock()
     _instance = None
-    _startup_callables = []
-    _registration_callables = {}
+    _startup_callables = [] # TODO 启动的回调对象
+    _registration_callables = {} # TODO 注册的回调对象
 
     @staticmethod
     def run_on_startup(callable):
@@ -710,7 +710,7 @@ class Agent(object):
         self.shutdown_agent()
 
     def shutdown_agent(self, timeout=None):
-        if self._harvest_shutdown.isSet():
+        if self._harvest_shutdown.isSet(): # TODO 说明线程还在运行,直接返回
             return
 
         if timeout is None:
@@ -721,6 +721,7 @@ class Agent(object):
         # Schedule final harvests. This is OK to schedule across threads since
         # the entries will only be added to the end of the list and won't be
         # popped until harvest_shutdown is set.
+        # TODO 加入无限周期任务
         self._scheduler.enter(
                 float('inf'),
                 3,
@@ -732,13 +733,13 @@ class Agent(object):
                 self._harvest_default,
                 (True,))
 
-        self._harvest_shutdown.set()
+        self._harvest_shutdown.set() # TODO 所有采集任务都开始执行,不用阻塞
 
         if self._config.debug.disable_harvest_until_shutdown:
             _logger.debug('Start Python Agent main thread on shutdown.')
             self._harvest_thread.start()
 
-        if self._harvest_thread.is_alive():
+        if self._harvest_thread.is_alive(): # TODO 如果采集线程还是活的,一直运行到超时
             self._harvest_thread.join(timeout)
 
 

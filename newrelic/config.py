@@ -212,7 +212,7 @@ def _map_default_host_value(license_key):
 # Processing of a single setting from configuration file.
 
 def _raise_configuration_error(section, option=None):
-    #
+    # TODO 解析配置文件可能抛出的异常,这里给它封装在一起了
     _logger.error('CONFIGURATION ERROR')
     if section:
         _logger.error('Section = %s' % section)
@@ -656,7 +656,8 @@ def _process_labels_setting(labels=None):
     # converted into a list of dictionaries. It is also necessary
     # to eliminate duplicates by taking the last value, plus apply
     # length limits and limits on the number collected.
-
+    # TODO 解析怕配置里的labels,准许给Application添加标签.它的格式是Server:One;Data Center:Primary
+    # TODO  用:隔开,用;表示多个标签
     if labels is None:
         labels = _settings.labels
 
@@ -702,6 +703,7 @@ def delete_setting(settings_object, name):
     as 'error_collector.attributes.enabled'
 
     """
+    #TODO 删除一个属性
 
     target = settings_object
     fields = name.split('.', 1)
@@ -719,6 +721,7 @@ def delete_setting(settings_object, name):
 
 
 def translate_deprecated_settings(settings, cached_settings):
+    # TODO 将就配置变量转换新的配置变量名,我们没必要做的这么复杂,直接删掉这部分
     # If deprecated setting has been set by user, but the new
     # setting has not, then translate the deprecated setting to the
     # new one.
@@ -873,7 +876,8 @@ def apply_local_high_security_mode_setting(settings):
     # When High Security Mode is activated, certain settings must be
     # set to be secure, even if that requires overriding a setting that
     # has been individually configured as insecure.
-
+    # TODO 某些设置被设置为不安全模式,及时激活了安全模式,也要重新将其设置为安全模式
+    # TODO 完全多余,删除
     if not settings.high_security:
         return settings
 
@@ -1087,6 +1091,7 @@ def _load_configuration(config_file=None, environment=None,
 
     # Instrument with function trace any callables supplied by the
     # user in thODO????
+    # TODO 对应指定的函数或者方法,可以添加钩子来监控起信息
     for function in _settings.transaction_tracer.function_trace: # TODO 代理器会捕获附加的时间信息，格式module:function or module:class.function
         try:
             (module, object_path) = function.split(':', 1)
@@ -1146,7 +1151,7 @@ def _raise_instrumentation_error(type, locals):
 # Registration of module import hooks defined in configuration file.
 
 _module_import_hook_results = {}  # TODO  导入的钩子
-_module_import_hook_registry = {}  # TODO 注册的钩子
+_module_import_hook_registry = {}  # TODO 需要注册的钩子,包括默认钩子和自定义钩子
 
 
 def module_import_hook_results():
@@ -1190,6 +1195,8 @@ def _module_import_hook(target, module, function):
 
     return _instrument
 
+# TODO ----------------------------通过以下灵活的方式,使用者可以自定义自己的钩子来监控自己想要的对象----------------
+
 
 def _process_module_configuration():
     # TODO 解析配置里的钩子配置，并注册绑定钩子，用户可以在自己的应用里自定义钩子并绑定，这个扩展性做的很好
@@ -1225,7 +1232,7 @@ def _process_module_configuration():
                 _logger.debug("register module %s" %
                         ((target, module, function),))
 
-                hook = _module_import_hook(target, module, function)
+                hook = _module_import_hook(target, module, function) # TODO target是要监控的目标
                 newrelic.api.import_hook.register_import_hook(target, hook)
 
                 _module_import_hook_results.setdefault(
@@ -1833,12 +1840,14 @@ def _process_error_trace_configuration():
             _raise_configuration_error(section)
 
 
+
 # Automatic data source loading defined in configuration file.
 
 _data_sources = []
 
 
 def _process_data_source_configuration():
+    # TODO 通过解析配置文件,解析出要采集的数据源只能解析section为data-source开头的,通过这种方式,指定要启用哪些采集数据的钩子
     for section in _config_object.sections():
         if not section.startswith('data-source:'):
             continue
@@ -1885,12 +1894,13 @@ def _process_data_source_configuration():
                     ((module, object_path, name),))
 
             _data_sources.append((section, module, object_path, application,
-                    name, settings, properties))
+                    name, settings, properties))  # TODO 通过module, object_path可以获取监控数据的钩子,参考本文件_startup_data_source函数的实现
         except Exception:
             _raise_configuration_error(section)
 
 
 def _startup_data_source():
+    # TODO 注册启动数据源,如果配置文件没有配置data-source,则这部分是空的
     _logger.debug('Registering data sources defined in configuration.')
 
     agent_instance = newrelic.core.agent.agent_instance()
@@ -1899,7 +1909,7 @@ def _startup_data_source():
             settings, properties in _data_sources:
         try:
             source = getattr(newrelic.api.import_hook.import_module(
-                    module), object_path)
+                    module), object_path) # TODO 获取钩子
 
             agent_instance.register_data_source(source,
                     application, name, settings, **properties)
@@ -1915,10 +1925,11 @@ _data_sources_done = False
 
 
 def _setup_data_source():
-
+    # TODO 设定数据源,它的原理就是将要注册的数据源添加到代理的对象Agent的_startup_callables属性里
     global _data_sources_done
 
     if _data_sources_done:
+        # TODO 如果数据源设定已经完成,就不用再设定了
         return
 
     _data_sources_done = True
@@ -1983,6 +1994,9 @@ def _process_function_profile_configuration():
             newrelic.api.import_hook.register_import_hook(module, hook)
         except Exception:
             _raise_configuration_error(section)
+
+
+# TODO ----------------------------通过以上灵活的方式,使用者可以自定义自己的钩子来监控自己想要的对象----------------
 
 
 def _process_module_definition(target, module, function='instrument'):
@@ -2709,9 +2723,10 @@ def _setup_instrumentation():
     _process_module_configuration()
     _process_module_entry_points()
     _process_trace_cache_import_hooks()
-    _process_module_builtin_defaults()
+    _process_module_builtin_defaults() # TODO 加载默认钩子
 
     # TODO 下面这些都准许用户在应用中自定义钩子，并绑定，扩展性做的很好
+    # TODO 加载自定义钩子
     _process_wsgi_application_configuration()
     _process_background_task_configuration()
 
