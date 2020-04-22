@@ -106,7 +106,7 @@ class Agent(object):
 
     _instance_lock = threading.Lock()
     _instance = None
-    _startup_callables = [] # TODO 启动的回调对象
+    _startup_callables = [] # TODO 需要在启动时运行的回调对象
     _registration_callables = {} # TODO 注册的回调对象
 
     @staticmethod
@@ -115,6 +115,7 @@ class Agent(object):
 
     @staticmethod
     def run_on_registration(application, callable):
+        # TODO 该函数没有地方用到????
         callables = Agent._registration_callables.setdefault(application, [])
         callables.append(callable)
 
@@ -384,7 +385,7 @@ class Agent(object):
                         self._data_sources.get(None, []):
                     application.register_data_source(source, name,
                             settings, **properties)
-
+                # TODO 自定义数据指标是怎么注册的呢?
                 for source, name, settings, properties in \
                         self._data_sources.get(app_name, []):
                     application.register_data_source(source, name,

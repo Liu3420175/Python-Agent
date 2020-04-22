@@ -1843,11 +1843,13 @@ def _process_error_trace_configuration():
 
 # Automatic data source loading defined in configuration file.
 
+# TODO -------------------------以下方法支持用户自定义统计指标---------------------
+
 _data_sources = []
 
 
 def _process_data_source_configuration():
-    # TODO 通过解析配置文件,解析出要采集的数据源只能解析section为data-source开头的,通过这种方式,指定要启用哪些采集数据的钩子
+    # TODO 通过解析配置文件,解析出要采集的数据源(统计指标)只能解析section为data-source开头的,通过这种方式,指定要启用哪些采集数据的钩子,该钩子也是自定义的
     for section in _config_object.sections():
         if not section.startswith('data-source:'):
             continue
@@ -1955,6 +1957,7 @@ def _function_profile_import_hook(object_path, filename, delay, checkpoint):
 
 
 def _process_function_profile_configuration():
+    # TODO 解析自定义函数分析器
     for section in _config_object.sections():
         if not section.startswith('function-profile:'):
             continue
@@ -1995,7 +1998,7 @@ def _process_function_profile_configuration():
         except Exception:
             _raise_configuration_error(section)
 
-
+# TODO -------------------------以上方法支持用户自定义统计指标---------------------
 # TODO ----------------------------通过以上灵活的方式,使用者可以自定义自己的钩子来监控自己想要的对象----------------
 
 
