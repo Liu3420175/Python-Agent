@@ -11,7 +11,7 @@
 # TODO https://docs.newrelic.com/docs/agents/manage-apm-agents/agent-data/agent-attributes
 
 # TODO 配置文件里的attribute的目的地
-# TODO
+# TODO 这些目的地位域的位置跟位移位置对应
 DST_NONE = 0x0
 DST_ALL  = 0x3F
 DST_TRANSACTION_EVENTS   = 1 << 0
@@ -71,8 +71,8 @@ class AttributeFilter(object):
         :param flattened_settings:  # TODO 初始化后的setting,是个字典对象
         """
         # TODO enabled_destinations 通过位域的方式来确定有哪些地方要收集属性，上面的DST_*定义就定位了目的地和位的关系
-        self.enabled_destinations = self._set_enabled_destinations(flattened_settings)
-        self.rules = self._build_rules(flattened_settings)
+        self.enabled_destinations = self._set_enabled_destinations(flattened_settings)  # TODO 生成目的地
+        self.rules = self._build_rules(flattened_settings) # TODO 创建属性验证规则
         self.cache = {}
 
     def __repr__(self):
@@ -80,7 +80,7 @@ class AttributeFilter(object):
                 bin(self.enabled_destinations), self.rules)
 
     def _set_enabled_destinations(self, settings):
-
+        # TODO 获得位域表示的目的地值
         # Determines and returns bitfield representing attribute destinations enabled.
 
         enabled_destinations = DST_NONE
@@ -147,6 +147,7 @@ class AttributeFilter(object):
         return tuple(rules)
 
     def apply(self, name, default_destinations):
+        # TODO 获取目的地
         if self.enabled_destinations == DST_NONE:
             return DST_NONE
 
@@ -167,6 +168,7 @@ class AttributeFilter(object):
 
         self.cache[cache_index] = destinations
         return destinations
+
 
 class AttributeFilterRule(object):
 

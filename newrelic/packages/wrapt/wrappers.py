@@ -12,9 +12,11 @@ if PY3:
 else:
     string_types = basestring,
 
+
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
     return meta("NewBase", bases, {})
+
 
 class _ObjectProxyMethods(object):
 
@@ -59,6 +61,7 @@ class _ObjectProxyMethods(object):
     def __weakref__(self):
         return self.__wrapped__.__weakref__
 
+
 class _ObjectProxyMetaType(type):
     def __new__(cls, name, bases, dictionary):
         # Copy our special properties into the class so that they
@@ -69,6 +72,7 @@ class _ObjectProxyMetaType(type):
         dictionary.update(vars(_ObjectProxyMethods))
 
         return type.__new__(cls, name, bases, dictionary)
+
 
 class ObjectProxy(with_metaclass(_ObjectProxyMetaType)):
 
@@ -81,6 +85,7 @@ class ObjectProxy(with_metaclass(_ObjectProxyMetaType)):
         # allow it to be overridden using a property and it must instead
         # be an actual string object instead.
 
+        # TODO __qualname__ 限定名称,一个以点号分隔的名称，显示从模块的全局作用域到该模块中定义的某个类、函数或方法的“路径”
         try:
             object.__setattr__(self, '__qualname__', wrapped.__qualname__)
         except AttributeError:
@@ -102,6 +107,7 @@ class ObjectProxy(with_metaclass(_ObjectProxyMetaType)):
     def __class__(self, value):
         self.__wrapped__.__class__ = value
 
+    # TODO __annotations__ 返回函数标注,当函数定义指定变量类型时,函数标注就不是空字典了
     @property
     def __annotations__(self):
         return self.__wrapped__.__anotations__
@@ -117,6 +123,7 @@ class ObjectProxy(with_metaclass(_ObjectProxyMetaType)):
         return str(self.__wrapped__)
 
     if PY3:
+        # TODO 通过 bytes 调用以生成一个对象的字节串表示
         def __bytes__(self):
             return bytes(self.__wrapped__)
 
@@ -410,10 +417,12 @@ class ObjectProxy(with_metaclass(_ObjectProxyMetaType)):
     def __iter__(self):
         return iter(self.__wrapped__)
 
+
 class CallableObjectProxy(ObjectProxy):
 
     def __call__(self, *args, **kwargs):
         return self.__wrapped__(*args, **kwargs)
+
 
 class _FunctionWrapperBase(ObjectProxy):
 
@@ -521,6 +530,7 @@ class _FunctionWrapperBase(ObjectProxy):
         return self._self_wrapper(self.__wrapped__, self._self_instance,
                 args, kwargs)
 
+
 class BoundFunctionWrapper(_FunctionWrapperBase):
 
     def __call__(self, *args, **kwargs):
@@ -578,6 +588,7 @@ class BoundFunctionWrapper(_FunctionWrapperBase):
 
             return self._self_wrapper(self.__wrapped__, instance, args,
                     kwargs)
+
 
 class FunctionWrapper(_FunctionWrapperBase):
 
@@ -767,6 +778,7 @@ def wrap_object_attribute(module, name, factory, args=(), kwargs={}):
 # for use when doing monkey patching. For a more featured way of
 # creating decorators see the decorator decorator instead.
 
+
 def function_wrapper(wrapper):
     def _wrapper(wrapped, instance, args, kwargs):
         target_wrapped = args[0]
@@ -779,13 +791,16 @@ def function_wrapper(wrapper):
         return FunctionWrapper(target_wrapped, target_wrapper)
     return FunctionWrapper(wrapper, _wrapper)
 
+
 def wrap_function_wrapper(module, name, wrapper):
     return wrap_object(module, name, FunctionWrapper, (wrapper,))
+
 
 def patch_function_wrapper(module, name):
     def _wrapper(wrapper):
         return wrap_object(module, name, FunctionWrapper, (wrapper,))
     return _wrapper
+
 
 def transient_function_wrapper(module, name):
     def _decorator(wrapper):
@@ -818,6 +833,7 @@ def transient_function_wrapper(module, name):
 # and the original function. The function is then rebound at the point
 # of a call via the weak function proxy.
 
+
 def _weak_function_proxy_callback(ref, proxy, callback):
     if proxy._self_expired:
         return
@@ -830,6 +846,7 @@ def _weak_function_proxy_callback(ref, proxy, callback):
 
     if callback is not None:
         callback(proxy)
+
 
 class WeakFunctionProxy(ObjectProxy):
 

@@ -12,12 +12,16 @@ _logger = logging.getLogger(__name__)
 
 EVENT_TYPE_VALID_CHARS_REGEX = re.compile(r'^[a-zA-Z0-9:_ ]+$')
 
-class NameInvalidCharactersException(Exception): pass
+
+class NameInvalidCharactersException(Exception):
+    pass
+
 
 def check_event_type_valid_chars(name):
     regex = EVENT_TYPE_VALID_CHARS_REGEX
     if not regex.match(name):
         raise NameInvalidCharactersException()
+
 
 def process_event_type(name):
     """Perform all necessary validation on a potential event type.
@@ -59,6 +63,7 @@ def process_event_type(name):
     else:
         return name
 
+
 def create_custom_event(event_type, params):
     """Creates a valid custom event.
 
@@ -77,6 +82,9 @@ def create_custom_event(event_type, params):
 
     """
     # TODO 创建一个有效的自定义事件
+    # TODO event_type  自定义事件类型
+    # TODO params  自定义事件参数
+
     name = process_event_type(event_type)
 
     if name is None:
@@ -101,8 +109,8 @@ def create_custom_event(event_type, params):
         return None
 
     intrinsics = {
-        'type': name,
-        'timestamp': int(1000.0 * time.time()),
+        'type': name, # TODO 自定义事件访问类型
+        'timestamp': int(1000.0 * time.time()), # TODO 访问时间戳
     }
 
     event = [intrinsics, attributes]

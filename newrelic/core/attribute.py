@@ -13,7 +13,7 @@ from newrelic.core.attribute_filter import (DST_ALL, DST_ERROR_COLLECTOR,
 _logger = logging.getLogger(__name__)
 
 _Attribute = namedtuple('_Attribute',
-        ['name', 'value', 'destinations'])
+        ['name', 'value', 'destinations']) # TODO 三个字段对应的意思是:名称,值,位域目的地
 
 # The following destinations are created here, never changed, and only
 # used increate_agent_attributes. It is placed at the module level here
@@ -92,11 +92,12 @@ class Attribute(_Attribute):
 
 
 def create_attributes(attr_dict, destinations, attribute_filter):
+    # TODO 创建属性,创建属性的时候会验证属性值的规则,可以看AttributeFilter源码
 
     attributes = []
 
     for k, v in attr_dict.items():
-        dest = attribute_filter.apply(k, destinations)
+        dest = attribute_filter.apply(k, destinations) # TODO 获取目的地.
         attributes.append(Attribute(k, v, dest))
 
     return attributes
@@ -166,6 +167,7 @@ def truncate(
     # If text is unicode (Python 2 or 3), return unicode.
     # If text is a Python 2 string, return str.
 
+    # TODO 对于超过长度的进行截断处理
     if isinstance(text, six.text_type):
         truncated = _truncate_unicode(text, maxsize, encoding)
     else:

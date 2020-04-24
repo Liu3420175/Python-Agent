@@ -85,7 +85,7 @@ def collector_url(server=None):
     in an agent session should be sent to.
 
     """
-    # TODO 发送数据的URL
+    # TODO 发送数据的URL,可以改造成自己的
     settings = global_settings()
 
     url = '%s://%s/agent_listener/invoke_raw_method'
@@ -112,6 +112,7 @@ def proxy_server():
     the 'requests' library when making requests.
 
     """
+    # TODO 获取代理服务地址,按照requests包的格式要求拼接代理服务的地址、端口、用户名、密码
 
     settings = global_settings()
 

@@ -4,6 +4,7 @@ purpose decorators and wrapper functions for various basic tasks one can
 make use of when doing monkey patching.
 
 """
+# TODO 通用对象装饰器
 
 import sys
 import inspect

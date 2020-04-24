@@ -106,7 +106,7 @@ class Agent(object):
 
     _instance_lock = threading.Lock()
     _instance = None
-    _startup_callables = [] # TODO 需要在启动时运行的回调对象
+    _startup_callables = [] # TODO 需要在启动时运行的回调对象,一般存储自定义的钩子,统计指标
     _registration_callables = {} # TODO 注册的回调对象
 
     @staticmethod
@@ -169,7 +169,7 @@ class Agent(object):
                 instance = Agent(settings)
                 _logger.debug('Registering builtin data sources.')
 
-                # TODO 注册数据源?????
+                # TODO 注册数据源,即采集数据指标
                 instance.register_data_source(cpu_usage_data_source)
                 instance.register_data_source(memory_usage_data_source)
                 instance.register_data_source(thread_utilization_data_source)
