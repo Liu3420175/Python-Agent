@@ -4,7 +4,8 @@ import types
 import time
 import threading
 
-_context = threading.local()
+_context = threading.local() # TODO 针对各个线程的一个全局对象。在多线程环境下，每个线程都有自己的数据
+
 
 class InternalTrace(object):
 
@@ -20,10 +21,13 @@ class InternalTrace(object):
         return self
 
     def __exit__(self, exc, value, tb):
+        # TODO 退出上下文时,记录自定义指标
         duration = max(self.start, time.time()) - self.start
         if self.metrics is not None:
             self.metrics.record_custom_metric(self.name, duration)
 
+
+# TODO 应该是用来做类装饰器
 class InternalTraceWrapper(object):
 
     def __init__(self, wrapped, name):
@@ -53,6 +57,7 @@ class InternalTraceWrapper(object):
         with InternalTrace(self.__name, metrics):
             return self.__wrapped(*args, **kwargs)
 
+
 class InternalTraceContext(object):
 
     def __init__(self, metrics):
@@ -60,7 +65,7 @@ class InternalTraceContext(object):
         self.metrics = metrics
 
     def __enter__(self):
-        self.previous = getattr(_context, 'current', None)
+        self.previous = getattr(_context, 'current', None) # TODO 先前的指标对象
         _context.current = self.metrics
         return self
 
@@ -68,19 +73,24 @@ class InternalTraceContext(object):
         if self.previous is not None:
             _context.current = self.previous
 
+
 def internal_trace(name=None):
     def decorator(wrapped):
         return InternalTraceWrapper(wrapped, name)
     return decorator
 
+
 def wrap_internal_trace(module, object_path, name=None):
     newrelic.api.object_wrapper.wrap_object(module, object_path,
             InternalTraceWrapper, (name,))
 
+
 def internal_metric(name, value):
+    # TODO name指标名称 value 指标值
     metrics = getattr(_context, 'current', None)
     if metrics is not None:
         metrics.record_custom_metric(name, value)
+
 
 def internal_count_metric(name, count):
     """Create internal metric where only count has a value.

@@ -150,6 +150,7 @@ def connection_type(proxies):
         'newrelic.packages.requests.packages.urllib3.connectionpool',
         'HTTPSConnectionPool._prepare_conn')
 def _requests_proxy_scheme_workaround(wrapped, instance, args, kwargs):
+    # TODO  没地方用到该函数????
     def _params(connection, *args, **kwargs):
         return connection
 
@@ -178,6 +179,7 @@ def _requests_proxy_scheme_workaround(wrapped, instance, args, kwargs):
         'newrelic.packages.requests.adapters',
         'HTTPAdapter.request_url')
 def _requests_request_url_workaround(wrapped, instance, args, kwargs):
+    # TODO  没地方用到该函数????
     from newrelic.packages.requests.adapters import urldefragauth
 
     def _bind_params(request, proxies):
@@ -205,6 +207,7 @@ def _requests_request_url_workaround(wrapped, instance, args, kwargs):
         'newrelic.packages.requests.packages.urllib3.util.ssl_',
         'SSLContext')
 def _urllib3_ssl_recursion_workaround(wrapped, instance, args, kwargs):
+    # TODO  没地方用到该函数????
     try:
         import ssl
         return ssl.SSLContext(*args, **kwargs)
@@ -217,12 +220,12 @@ def _urllib3_ssl_recursion_workaround(wrapped, instance, args, kwargs):
 # collector to use. Subsequent calls are then made to it.
 
 
-_audit_log_fp = None
-_audit_log_id = 0
+_audit_log_fp = None  # TODO 审计日志文件句柄
+_audit_log_id = 0     # TODO 审计日志文件的id,用来给日志文件命名
 
 
 def _log_request(url, params, headers, data):
-    # TODO 每次发送数据时请求的日志
+    # TODO 每次发送数据时请求的日志,本地日志文件,如果没有开启日志审计功能.
     settings = global_settings()
 
     if not settings.audit_log_file:
@@ -258,6 +261,7 @@ def _log_request(url, params, headers, data):
     print(file=_audit_log_fp)
     print('DATA:', end=' ', file=_audit_log_fp)
 
+    # TODO 压缩请求参数
     content_encoding = headers.get('Content-Encoding')
     if content_encoding == 'deflate':
         data = zlib.decompress(data)
@@ -266,6 +270,7 @@ def _log_request(url, params, headers, data):
         data = decompressor.decompress(data)
         data += decompressor.flush()
 
+    # TODO 编码数据
     if isinstance(data, bytes):
         data = data.decode('Latin-1')
 
@@ -307,6 +312,8 @@ def _log_request(url, params, headers, data):
 
 
 def _log_response(log_id, result):
+    # TODO 将响应结果记录下来
+
 
     print('TIME: %r' % time.strftime('%Y-%m-%d %H:%M:%S',
             time.localtime()), file=_audit_log_fp)
@@ -435,7 +442,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
     # HTTP errors for requests.
 
     internal_metric('Supportability/Python/Collector/Output/Bytes/'
-            '%s' % method, len(data))
+            '%s' % method, len(data)) # TODO 统计收集器输出的数据字节长度
 
     # If audit logging is enabled, log the requests details.
 
