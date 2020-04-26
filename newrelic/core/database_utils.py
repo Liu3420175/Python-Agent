@@ -2,7 +2,7 @@
 explain plans for SQL etc.
 
 """
-
+# TODO 数据库相关包,用于安全模式下混淆SQL(比如将敏感的参数信息匿名化,以便保护敏感信息),SQL执行计划
 import logging
 import re
 import weakref
@@ -25,10 +25,11 @@ _logger = logging.getLogger(__name__)
 # Escaping of quotes in SQL isn't like normal C style string. That is,
 # no backslash. Uses two successive instances of quote character in
 # middle of the string to indicate one embedded quote.
+# TODO SQL 在回数据收集器之前就已经被模糊化了,以便保护敏感信息,模糊化的地方包括:带引号的字符串,整数,浮点数,带?的文字
 
-_single_quotes_p = r"'(?:[^']|'')*?(?:\\'.*|'(?!'))"
-_double_quotes_p = r'"(?:[^"]|"")*?(?:\\".*|"(?!"))'
-_dollar_quotes_p = r'(\$(?!\d)[^$]*?\$).*?(?:\1|$)'
+_single_quotes_p = r"'(?:[^']|'')*?(?:\\'.*|'(?!'))"  # TODO 单引号正则
+_double_quotes_p = r'"(?:[^"]|"")*?(?:\\".*|"(?!"))'  # TODO 双引号正则
+_dollar_quotes_p = r'(\$(?!\d)[^$]*?\$).*?(?:\1|$)'   # TODO  带$的
 _oracle_quotes_p = (r"q'\[.*?(?:\]'|$)|q'\{.*?(?:\}'|$)|"
         r"q'\<.*?(?:\>'|$)|q'\(.*?(?:\)'|$)")
 _any_quotes_p = _single_quotes_p + '|' + _double_quotes_p
@@ -63,10 +64,10 @@ _single_dollar_cleanup_re = re.compile(_single_dollar_cleanup_p)
 # follows on from a ':'. This is because ':1' can be used as positional
 # parameter with database adapters where 'paramstyle' is 'numeric'.
 
-_uuid_p = r'\{?(?:[0-9a-f]\-?){32}\}?'
-_int_p = r'(?<!:)-?\b(?:[0-9]+\.)?[0-9]+(e[+-]?[0-9]+)?'
-_hex_p = r'0x[0-9a-f]+'
-_bool_p = r'\b(?:true|false|null)\b'
+_uuid_p = r'\{?(?:[0-9a-f]\-?){32}\}?' # TODO UUID 正则
+_int_p = r'(?<!:)-?\b(?:[0-9]+\.)?[0-9]+(e[+-]?[0-9]+)?' #  TODO 整数正则
+_hex_p = r'0x[0-9a-f]+' # TODO 16进制正则
+_bool_p = r'\b(?:true|false|null)\b'  # TODO bool 正则
 
 # Join all literals into one compiled regular expression. Longest expressions
 # first to avoid the situation of partial matches on shorter expressions. UUIDs
@@ -89,7 +90,7 @@ def _obfuscate_sql(sql, database):
 
     # Substitute quoted strings first.
 
-    sql = quotes_re.sub('?', sql)
+    sql = quotes_re.sub('?', sql) # TODO 正则替换成问号
 
     # Replace all other sensitive fields
 

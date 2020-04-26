@@ -2,7 +2,7 @@
 system, Python and hosting environment.
 
 """
-# TODO 收集环境变量
+# TODO 收集运行环境变量信息
 import newrelic
 
 from newrelic.common.system_info import (total_physical_memory,

@@ -716,7 +716,7 @@ class Application(object):
         of a specific transaction.
 
         """
-        # TODO 统计器记录异常
+        # TODO 统计器记录异常, 只是记录,并没有将数据发送出去
         if not self._active_session:
             return
 
@@ -742,7 +742,7 @@ class Application(object):
         additional locking will be required.
 
         """
-        # TODO 统计器记录自定义数据指标
+        # TODO 统计器记录自定义数据指标  只是记录,并没有将数据发送出去
         if not self._active_session:
             return
 
@@ -772,7 +772,7 @@ class Application(object):
                 self._stats_custom_engine.record_custom_metric(name, value)
 
     def record_custom_event(self, event_type, params):
-        # TODO 记录自定义事件详情(比如自带数参数等等)
+        # TODO 记录自定义事件详情(比如自带数参数等等)   只是记录,并没有将数据发送出去只是记录,并没有将数据发送出去
         if not self._active_session:
             return
 
@@ -791,6 +791,7 @@ class Application(object):
     def record_transaction(self, data, profile_samples=None):
         """Record a single transaction against this application."""
         # TODO data newrelic.core.transaction_node.TransactionNode
+        # TODO 只是记录,并没有将数据发送出去
         if not self._active_session:
             return
 
@@ -1389,7 +1390,7 @@ class Application(object):
 
                             self._active_session.send_transaction_events(
                                     synthetics_events.sampling_info,
-                                    synthetics_events)
+                                    synthetics_events) # TODO 发送采集的数据
 
                         stats.reset_synthetics_events()
 
@@ -1413,7 +1414,7 @@ class Application(object):
 
                                 self._active_session.send_transaction_events(
                                         transaction_events.sampling_info,
-                                        transaction_events)
+                                        transaction_events) # TODO 发送采集的数据
 
                             stats.reset_transaction_events()
 
@@ -1431,7 +1432,7 @@ class Application(object):
                                         'for harvest of %r.', self._app_name)
 
                                 self._active_session.send_span_events(
-                                    spans.sampling_info, span_samples)
+                                    spans.sampling_info, span_samples) # TODO 发送采集的数据
                                 span_samples = None
 
                             # As per spec
@@ -1462,7 +1463,7 @@ class Application(object):
                                 samp_info = error_events.sampling_info
                                 self._active_session.send_error_events(
                                         samp_info,
-                                        error_event_samples)
+                                        error_event_samples) # TODO 发送采集的数据
                                 error_event_samples = None
 
                             # As per spec
@@ -1489,7 +1490,7 @@ class Application(object):
                                         'for harvest of %r.', self._app_name)
 
                                 self._active_session.send_custom_events(
-                                        customs.sampling_info, custom_samples)
+                                        customs.sampling_info, custom_samples) # TODO 发送采集的数据
                                 custom_samples = None
 
                             # As per spec
@@ -1509,7 +1510,7 @@ class Application(object):
                             _logger.debug('Sending error data for harvest '
                                     'of %r.', self._app_name)
 
-                            self._active_session.send_errors(error_data)
+                            self._active_session.send_errors(error_data) # TODO 发送采集的数据
 
                     if not flexible:
                         if configuration.collect_traces:
@@ -1533,7 +1534,7 @@ class Application(object):
                                                 self._app_name)
 
                                         self._active_session.send_sql_traces(
-                                                slow_sql_data)
+                                                slow_sql_data) # TODO 发送采集的数据
 
                                 slow_transaction_data = (
                                         stats.transaction_trace_data(
@@ -1546,7 +1547,7 @@ class Application(object):
 
                                     self._active_session \
                                     .send_transaction_traces(
-                                            slow_transaction_data)
+                                            slow_transaction_data) # TODO 发送采集的数据
 
                         # Create a metric_normalizer based on normalize_name
                         # If metric rename rules are empty, set normalizer
@@ -1578,7 +1579,7 @@ class Application(object):
 
                         # Send metrics
                         self._active_session.send_metric_data(
-                                self._period_start, period_end, metric_data)
+                                self._period_start, period_end, metric_data) # TODO 发送采集的数据
 
                         _logger.debug('Done sending data for harvest of '
                                 '%r.', self._app_name)
@@ -1731,7 +1732,7 @@ class Application(object):
             if profile_data:
                 _logger.debug('Reporting thread profiling session data '
                         'for %r.', self._app_name)
-                self._active_session.send_profile_data(profile_data)
+                self._active_session.send_profile_data(profile_data) # TODO 发送采集的数据
 
     def internal_agent_shutdown(self, restart=False):
         """Terminates the active agent session for this application and
@@ -1858,4 +1859,4 @@ class Application(object):
                 # Send back any result for the agent command.
 
                 if cmd_res:
-                    self._active_session.send_agent_command_results(cmd_res)
+                    self._active_session.send_agent_command_results(cmd_res) # TODO 发送采集的数据
