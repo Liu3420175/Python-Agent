@@ -8,6 +8,8 @@ _context = threading.local() # TODO 针对各个线程的一个全局对象。�
 
 
 class InternalTrace(object):
+    # TODO 定义一个上下文管理器对象来统计指标,如果指标对象是空的,就当是个计时器;这个设计方案好啊
+    # TODO 参见data_collector.py里的send_request函数的应用
 
     def __init__(self, name, metrics=None):
         self.name = name
@@ -23,7 +25,7 @@ class InternalTrace(object):
     def __exit__(self, exc, value, tb):
         # TODO 退出上下文时,记录自定义指标
         duration = max(self.start, time.time()) - self.start
-        if self.metrics is not None:
+        if self.metrics is not None: # TODO 如果指标函数是空的,就当是个计时器
             self.metrics.record_custom_metric(self.name, duration)
 
 
@@ -86,7 +88,7 @@ def wrap_internal_trace(module, object_path, name=None):
 
 
 def internal_metric(name, value):
-    # TODO name指标名称 value 指标值
+    # TODO name指标名称 value 指标值, 可以用来记录某个指标的次数,比如数据上报错误次数,超时次数;数据压缩失败次数等等等,在data_collector.py里有大量用处
     metrics = getattr(_context, 'current', None)
     if metrics is not None:
         metrics.record_custom_metric(name, value)

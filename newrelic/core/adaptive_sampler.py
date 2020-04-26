@@ -2,6 +2,7 @@ import random
 import time
 import threading
 
+
 # TODO 这个类起啥作用?????
 class AdaptiveSampler(object):
     def __init__(self, sampling_target, sampling_period):

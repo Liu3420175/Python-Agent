@@ -56,7 +56,7 @@ class Application(object):
 
         self._period_start = 0.0
 
-        self._active_session = None # TODO 应用会话，干嘛用的????newrelic.core.data_collector.ApplicationSession
+        self._active_session = None # TODO 应用会话，是newrelic.core.data_collector.ApplicationSession类,这个类主要是用来上报数据的,封装了一些接口,就是应用数据收集器
         self._harvest_enabled = False # TODO 是否收集数据????
 
         self._transaction_count = 0 # TODO 监控事物次数
@@ -346,7 +346,7 @@ class Application(object):
                 with InternalTraceContext(internal_metrics):
                     active_session = create_session(None, self._app_name,
                             self.linked_applications, environment_settings(),
-                            global_settings_dump())
+                            global_settings_dump()) # TODO 创建应用数据收集器会话,用于上报数据
 
                 # We were successful, but first need to make sure we do
                 # not have any problems with the agent normalization

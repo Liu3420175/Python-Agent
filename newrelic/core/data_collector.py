@@ -415,11 +415,11 @@ def send_request(session, url, method, license_key, agent_run_id=None,
         wbits = 31 if settings.compressed_content_encoding == 'gzip' else 15
 
         internal_metric('Supportability/Python/Collector/ZLIB/Bytes/'
-                '%s' % method, len(data))
+                '%s' % method, len(data)) # TODO 记录压缩前文本字节长度
 
         headers['Content-Encoding'] = settings.compressed_content_encoding
         with InternalTrace('Supportability/Python/Collector/ZLIB/Compress/'
-                '%s' % method):
+                '%s' % method):  # TODO 用一个上下文对象记录压缩时间消耗
             compressor = zlib.compressobj(level, zlib.DEFLATED, wbits)
             data = compressor.compress(data)
             data += compressor.flush()
@@ -451,6 +451,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
     max_payload_size_in_bytes = (max_payload_size_in_bytes or
             settings.max_payload_size_in_bytes)
     if len(data) > max_payload_size_in_bytes:
+        # TODO 如果压缩后大小还超过阈值,就跑出异常
         _logger.warning('The payload being sent to method %r was over the '
                 'maximum allowed size limit. The length of the request '
                 'content was %d.', method, len(data))
@@ -536,6 +537,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
         raise
 
     finally:
+        # TODO 如果设置了主动关闭会话,就需要主动关闭
         if auto_close_session:
             session.close()
             session = None
@@ -552,7 +554,7 @@ def send_request(session, url, method, license_key, agent_run_id=None,
 
             result = json_decode(content)
 
-            return_value = result['return_value']
+            return_value = result['return_value'] # TODO retrun_value是newrelic后端自定义的返回值属性
         except Exception as e:
             _logger.exception('Error decoding data for JSON payload for '
                     'method %r with payload of %r. Please report this problem '
@@ -727,8 +729,12 @@ class ApplicationSession(object):
     once the initial registration has been done.
 
     """
+    # TODO 这个类是用来封装应用和收集器的,一旦初始化话完成后,应用会绑定一个收集器类,也就是这个类,咱叫它应用数据收集器把
 
     def __init__(self, collector_url, license_key, configuration):
+        """
+        # TODO configuration 是Setting对象
+        """
         self.collector_url = collector_url
         self.license_key = license_key
         self.configuration = configuration
@@ -1043,7 +1049,7 @@ class ApplicationSession(object):
             # configuration and overlaying it with that from the server,
             # as well as creating the attribute filter.
 
-            application_config = finalize_application_settings(server_config)
+            application_config = finalize_application_settings(server_config)  # TODO  获得应用配置,Setting对象
 
         except ForceAgentDisconnect:
             # ForceAgentDisconnect during a connect cycle should result in the

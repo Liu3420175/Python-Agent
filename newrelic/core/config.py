@@ -604,7 +604,7 @@ _settings.slow_sql.enabled = True
 _settings.synthetics.enabled = True
 
 # TODO 代理的限制
-_settings.agent_limits.data_collector_timeout = 30.0
+_settings.agent_limits.data_collector_timeout = 30.0 # TODO 数据收集器超时现在,如果这个时间内数据还上传上去,就是超时
 _settings.agent_limits.transaction_traces_nodes = 2000
 _settings.agent_limits.sql_query_length_maximum = 16384
 _settings.agent_limits.slow_sql_stack_trace = 30
