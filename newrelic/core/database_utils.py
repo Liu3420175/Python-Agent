@@ -85,6 +85,12 @@ _quotes_table = {
 
 
 def _obfuscate_sql(sql, database):
+    """
+
+    :param sql:
+    :param SQLDatabase database :
+    :return:
+    """
     quotes_re, quotes_cleanup_re = _quotes_table.get(database.quoting_style,
             (_single_quotes_re, _single_quotes_cleanup_re))
 
@@ -121,19 +127,22 @@ def _obfuscate_sql(sql, database):
 # Note that we pickup up both ':1' and ':name' with the sub pattern
 # ':\w+'. This can match ':1name', which is not strictly correct, but
 # then it likely isn't valid in SQL anyway for that param style.
+# TODO 完成SQL的规范化,对应两个仅参数值不同的SQL,规范化后,他们的哈希值应该是一样的
+# TODO 我们需要解决的问题
+# TODO   1. 哪里的值是可变参数值 2. 找出所有空格并规范化
 
-
-_normalize_params_1_p = r'%\([^)]*\)s'
+#　TODO 这块就是匹配Python字符串拼接的集中方式的写法
+_normalize_params_1_p = r'%\([^)]*\)s' #　TODO  对于参数化的SQL,正则匹配出命名参数
 _normalize_params_1_re = re.compile(_normalize_params_1_p)
-_normalize_params_2_p = r'%s'
+_normalize_params_2_p = r'%s' # TODO  对于参数化的SQL,正则匹配出顺序参数
 _normalize_params_2_re = re.compile(_normalize_params_2_p)
-_normalize_params_3_p = r':\w+'
+_normalize_params_3_p = r':\w+' # TODO  对于参数化的SQL,正则匹配出
 _normalize_params_3_re = re.compile(_normalize_params_3_p)
 
-_normalize_values_p = r'\([^)]+\)'
+_normalize_values_p = r'\([^)]+\)' # TODO 正则匹配出具体值
 _normalize_values_re = re.compile(_normalize_values_p)
 
-_normalize_whitespace_1_p = r'\s+'
+_normalize_whitespace_1_p = r'\s+' #  TODO 正则匹配出空格
 _normalize_whitespace_1_re = re.compile(_normalize_whitespace_1_p)
 _normalize_whitespace_2_p = r'\s+(?!\w)'
 _normalize_whitespace_2_re = re.compile(_normalize_whitespace_2_p)
@@ -148,7 +157,7 @@ def _normalize_sql(sql):
     # Convert param style of '%(name)s' to '?'. We need to do
     # this before collapsing sets of values to a single value
     # due to the use of the parenthesis in the param style.
-
+    # TODO 规范化SQL
     sql = _normalize_params_1_re.sub('?', sql)
 
     # Collapse any parenthesised set of values to a single value.
@@ -184,7 +193,7 @@ def _normalize_sql(sql):
 # now for cases below which never get invoked, so is okay for now.
 
 
-_identifier_re = re.compile(r'[\',"`\[\]\(\)]*')
+_identifier_re = re.compile(r'[\',"`\[\]\(\)]*')  # TODO 标识符的正则匹配格式
 
 
 def _extract_identifier(token):
