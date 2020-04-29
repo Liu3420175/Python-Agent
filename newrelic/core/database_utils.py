@@ -160,7 +160,7 @@ def _normalize_sql(sql):
     # Convert param style of '%(name)s' to '?'. We need to do
     # this before collapsing sets of values to a single value
     # due to the use of the parenthesis in the param style.
-    # TODO 规范化SQL
+    # TODO 规范化SQL,用于求SQL的标识符
     sql = _normalize_params_1_re.sub('?', sql)
 
     # Collapse any parenthesised set of values to a single value.
@@ -212,6 +212,7 @@ _uncomment_sql_re = re.compile(_uncomment_sql_x, re.DOTALL)
 
 
 def _uncomment_sql(sql):
+    # TODO 替换掉SQL中的注释
     return _uncomment_sql_re.sub('', sql)
 
 # Parser routines for the different SQL statement operation types.
@@ -395,6 +396,7 @@ def _parse_alter(sql):
 # being set to None.
 
 
+# TODO 操作表,这个SQL语句是查询操作,是插入操作还是其它
 _operation_table = {
     'select': _parse_select,
     'delete': _parse_delete,
@@ -417,12 +419,14 @@ _parse_operation_re = re.compile(_parse_operation_p)
 
 
 def _parse_operation(sql):
+    # TODO 解析SQL操作类型
     match = _parse_operation_re.search(sql)
     operation = match and match.group(1).lower() or ''
     return operation if operation in _operation_table else ''
 
 
 def _parse_target(sql, operation):
+    # TODO 获得操作的目标(表)
     sql = sql.rstrip(';')
     parse = _operation_table.get(operation, None)
     return parse and parse(sql) or ''
@@ -676,11 +680,24 @@ def _query_result_dicts_to_tuples(columns, rows):
 
 
 def _could_be_multi_query(sql):
+    # TODO 判断是不是多条查询语句
     return sql.rstrip().rstrip(';').count(';') > 0
 
 
 def _explain_plan(connections, sql, database, connect_params, cursor_params,
         sql_parameters, execute_params):
+    """
+    # TODO 获取执行计划,原理很简单
+    :param connections: TODO 连接池
+    :param sql:  TODO 用户的查询SQL
+    :param database:  TODO SQLDatabase对象,用户使用的数据库信息
+    :param connect_params: TODO 连接参数
+    :param cursor_params:
+    :param sql_parameters:
+    :param execute_params:
+    :return:
+
+    """
 
     settings = global_settings()
 
@@ -693,7 +710,7 @@ def _explain_plan(connections, sql, database, connect_params, cursor_params,
                     'semicolons in the query string.', database.client)
         return None
 
-    query = '%s %s' % (database.explain_query, sql)
+    query = '%s %s' % (database.explain_query, sql) # TODO 拼接执行查询语句计划SQL
 
     if settings.debug.log_explain_plan_queries:
         _logger.debug('Executing explain plan for %r on %r.', query,
@@ -750,7 +767,6 @@ def _explain_plan(connections, sql, database, connect_params, cursor_params,
             return None
 
         return (columns, rows)
-
     except Exception:
         if settings.debug.log_explain_plan_queries:
             _logger.exception('Error occurred when executing explain '
@@ -777,6 +793,7 @@ def explain_plan(connections, sql_statement, connect_params, cursor_params,
     database = sql_statement.database
 
     if sql_statement.operation not in database.explain_stmts:
+        # TODO  如果SQL的执行操作不在范围呢,不执行计查询划任务
         return
 
     details = _explain_plan(connections, sql_statement.sql, database,
@@ -826,11 +843,12 @@ class SQLDatabase(object):
 
     @property
     def explain_query(self):
-        # TODO 执行计划
+        # TODO 执行计划的语句,比如EXPLAIN,每种数据库的执行查询计划的关键字不同
         return getattr(self.dbapi2_module, '_nr_explain_query', None)
 
     @property
     def explain_stmts(self):
+        # TODO  准许查看执行计划报告?????
         result = getattr(self.dbapi2_module, '_nr_explain_stmts', None)
 
         if result is None:
@@ -840,6 +858,10 @@ class SQLDatabase(object):
 
 
 class SQLStatement(object):
+    """
+    TODO SQL报告,根据用户使用的sql查询语句及数据库类型,经过一系列操作后得到的SQL报告,包括用什么类型的数据库,原始SQL,模糊化后的SQL,统一后的SQL,
+    TODO 唯一标识符,执行的操作(是SELECT,DELETE,update等等)
+    """
 
     def __init__(self, sql, database=None):
         self._operation = None
@@ -901,7 +923,7 @@ class SQLStatement(object):
     @property
     def identifier(self):
         if self._identifier is None:
-            self._identifier = hash(self.normalized)
+            self._identifier = hash(self.normalized) # TODO 很好理解
         return self._identifier
 
     def formatted(self, sql_format):
