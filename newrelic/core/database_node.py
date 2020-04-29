@@ -1,3 +1,4 @@
+# TODO 理解了database_utils.py里的内容,这里面的内容很好理解
 from collections import namedtuple
 
 import newrelic.core.attribute as attribute
@@ -8,6 +9,22 @@ from newrelic.core.database_utils import sql_statement, explain_plan
 from newrelic.core.node_mixin import DatastoreNodeMixin
 from newrelic.core.metric import TimeMetric
 
+# TODO duration  执行耗时
+#  path
+#  request_uri   需要执行这个SQL的请求uri
+#  sql           用户的SQL
+#  sql_format    用户格式SQL的等级,off,row 还是obfuscated
+#  metric
+#  dbapi2_module  数据库钩子所在的模块
+#  stack_trace
+#  connect_params  连接参数
+#  cursor_params   游标参数
+#  sql_parameters  SQL 参数
+#  execute_params
+#  host             数据库HOST
+#  port_path_or_id  数据库端口
+#  database_name    数据库名称
+#  params           连接数据库要的参数
 
 _SlowSqlNode = namedtuple('_SlowSqlNode',
         ['duration', 'path', 'request_uri', 'sql', 'sql_format',
@@ -32,6 +49,15 @@ class SlowSqlNode(_SlowSqlNode):
         return self.statement.identifier
 
 
+# TODO children
+#  children
+#  start_time
+#  end_time
+#  is_async
+#  guid
+#  agent_attributes
+#  user_attributes
+
 _DatabaseNode = namedtuple('_DatabaseNode',
         ['dbapi2_module', 'sql', 'children', 'start_time', 'end_time',
         'duration', 'exclusive', 'stack_trace', 'sql_format',
@@ -53,6 +79,7 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
 
     @property
     def instance_hostname(self):
+        # TODO 获取数据库实例的hostname
         if self.host in system_info.LOCALHOST_EQUIVALENTS:
             hostname = system_info.gethostname()
         else:

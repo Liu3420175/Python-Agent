@@ -927,6 +927,7 @@ class SQLStatement(object):
         return self._identifier
 
     def formatted(self, sql_format):
+        # TODO 格式化后的SQL,根据安全等级来
         if sql_format == 'off':
             return ''
 
