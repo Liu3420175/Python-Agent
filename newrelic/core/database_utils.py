@@ -3,6 +3,9 @@ explain plans for SQL etc.
 
 """
 # TODO 数据库相关包,用于安全模式下混淆SQL(比如将敏感的参数信息匿名化,以便保护敏感信息),SQL执行计划
+# TODO 为什么需要SQLConnection和SQLConnections对象?获取用户SQL的执行计划,归根结底还是需要利用客户的数据库,然后发送获取执行计划的SQL语言.
+# TODO 所有一旦客户开启了获取SQL执行计划配置,我们就需要捕获存储客户的SQL连接,然后为己所用,所以我们看下这两个对象的用处就目标其中的原理了
+
 import logging
 import re
 import weakref
@@ -267,6 +270,7 @@ def _parse_default(sql, regex):
     return match and _extract_identifier(match.group(1)) or ''
 
 
+# TODO 各种可能影响到标识符计算的正则规则
 _parse_identifier_1_p = r'"((?:[^"]|"")+)"(?:\."((?:[^"]|"")+)")?'
 _parse_identifier_2_p = r"'((?:[^']|'')+)'(?:\.'((?:[^']|'')+)')?"
 _parse_identifier_3_p = r'`((?:[^`]|``)+)`(?:\.`((?:[^`]|``)+)`)?'
@@ -280,15 +284,21 @@ _parse_identifier_p = ''.join(('(', _parse_identifier_1_p, '|',
         _parse_identifier_4_p, '|', _parse_identifier_5_p, '|',
         _parse_identifier_6_p, '|', _parse_identifier_7_p, ')'))
 
-_parse_from_p = r'\s+FROM\s+' + _parse_identifier_p
+_parse_from_p = r'\s+FROM\s+' + _parse_identifier_p # TODO  解析出FROM 后面的表名
 _parse_from_re = re.compile(_parse_from_p, re.IGNORECASE)
 
 
 def _join_identifier(m):
+    """
+
+    :param re.Pattern m:
+    :return:
+    """
     return m and '.'.join([s for s in m.groups()[1:] if s]).lower() or ''
 
 
 def _parse_select(sql):
+    # TODO 解析出FROM 后面的表面,对于子查询忽略
     return _join_identifier(_parse_from_re.search(sql))
 
 
@@ -296,15 +306,18 @@ def _parse_delete(sql):
     return _join_identifier(_parse_from_re.search(sql))
 
 
-_parse_into_p = r'\s+INTO\s+' + _parse_identifier_p
+_parse_into_p = r'\s+INTO\s+' + _parse_identifier_p # TODO 解析INTO后面的表名
 _parse_into_re = re.compile(_parse_into_p, re.IGNORECASE)
 
 
 def _parse_insert(sql):
+    """
+    解析出INTO 后面的表名
+    """
     return _join_identifier(_parse_into_re.search(sql))
 
 
-_parse_update_p = r'\s*UPDATE\s+' + _parse_identifier_p
+_parse_update_p = r'\s*UPDATE\s+' + _parse_identifier_p  # TODO  解析出Update
 _parse_update_re = re.compile(_parse_update_p, re.IGNORECASE)
 
 
@@ -440,6 +453,7 @@ _explain_plan_postgresql_re_2 = re.compile(
 
 
 def _obfuscate_explain_plan_postgresql_substitute(text, mask):
+    # TODO 用替换的方式模糊化postgrepsql的执行计划
     # Perform substitutions for the explain plan on the text string.
 
     def replacement(matchobj):
@@ -505,10 +519,18 @@ def _obfuscate_explain_plan_postgresql(columns, rows, mask=None):
 
 _obfuscate_explain_plan_table = {
     'Postgres': _obfuscate_explain_plan_postgresql
-}
+} # TODO 全局变量,单例模式,存储SQL执行计划处理函数
 
 
 def _obfuscate_explain_plan(database, columns, rows):
+    """
+
+    :param SQLDatabase database:
+    :param columns:
+    :param rows:
+    :return:
+    """
+    # TODO 根据不同的数据库,获取对应的SQL执行计划
     obfuscator = _obfuscate_explain_plan_table.get(database.product)
     if obfuscator:
         return obfuscator(columns, rows)
@@ -567,6 +589,13 @@ class SQLConnections(object):
             _logger.debug('Creating SQL connections cache %r.', self)
 
     def connection(self, database, args, kwargs):
+        """
+
+        :param SQLDatabase database:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         key = (database.client, args, kwargs)
 
         connection = None
@@ -771,10 +800,13 @@ class SQLDatabase(object):
 
     @property
     def product(self):
+        # TODO 注入数据库钩子时,会调用newrelic.api.database_trace.register_database_client函数,这个函数会给每个module加入一些属性,其中就有_nr_database_product,
+        # TODO 以获取数据库的类型名称,比如MySQL,Redis等等,后面的property修饰的属性都是类似的
         return getattr(self.dbapi2_module, '_nr_database_product', None)
 
     @property
     def client(self):
+        # TODO 获取模块名称
         name = getattr(self.dbapi2_module, '__name__', None)
         if name is None:
             name = getattr(self.dbapi2_module, '__file__', None)
@@ -784,6 +816,7 @@ class SQLDatabase(object):
 
     @property
     def quoting_style(self):
+        # TODO 是单引号风格还是双引号风格还是都有
         result = getattr(self.dbapi2_module, '_nr_quoting_style', None)
 
         if result is None:
@@ -793,6 +826,7 @@ class SQLDatabase(object):
 
     @property
     def explain_query(self):
+        # TODO 执行计划
         return getattr(self.dbapi2_module, '_nr_explain_query', None)
 
     @property
@@ -881,10 +915,18 @@ class SQLStatement(object):
             return self.obfuscated
 
 
+# TODO weakref.WeakValueDictionary本质是字典,但是与传统的字典又不一样,它里面的值类型是弱引用,当这些值不被引用时这个值就会被垃圾回收器回收,所以它是个动态字典
+# TODO 有点类似于缓存(比如Redis里某些缓存如果长期不用的化也会被清除掉),实际上weakref.WeakValueDictionary对象被经常用来做缓存,在这里面也是一样
+# TODO 先将所有DB钩子都装入_sql_statements里,在系统运行中发现用户用的是MySQL数据库,那其它的DB钩子就被垃圾回收器回收了,这可以优化内存使用
+# TODO 这是一个高级用法!!!!!!!!
 _sql_statements = weakref.WeakValueDictionary()
 
 
 def sql_statement(sql, dbapi2_module):
+
+    #TODO  dbapi2_module 到底是啥?他是与DB有关的钩子的module名,newrelic.api.database_trace.py register_database_client函数就是通过module来注册数据库源的
+    # TODO 所以dbapi2_module是字符串,是项目里DB钩子的模块名
+
     key = (sql, dbapi2_module)
 
     result = _sql_statements.get(key, None)

@@ -1161,7 +1161,7 @@ def module_import_hook_results():
 def _module_import_hook(target, module, function):
 
     # TODO 通过模块导入钩子
-    # TODO module  对应的本项目的报名
+    # TODO module  对应的本项目的包名
     # TODO target 要监控的目标模块名称，比如os,django.core.handlers.wsgi等等，这些标准库或者第三方包的
     # TODO function 对应的函数
     def _instrument(target):
@@ -1220,7 +1220,7 @@ def _process_module_configuration():
             execute = _config_object.get(section, 'execute')
             fields = execute.split(':', 1)
             module = fields[0]
-            function = 'instrument'
+            function = 'instrument' # TODO  每个钩子模块里都定义了一个instrument函数
             if len(fields) != 1:
                 function = fields[1]
 
@@ -2004,9 +2004,9 @@ def _process_function_profile_configuration():
 
 def _process_module_definition(target, module, function='instrument'):
     # TODO 将监控的对象与钩子绑定
-    # TODO module  对应的本项目的报名
+    # TODO module  对应的本项目的包名
     # TODO target 要监控的目标模块名称，比如os,django.core.handlers.wsgi等等，这些标准库或者第三方包的
-    # TODO function 对应的函数
+    # TODO function 对应的函数,每个钩子模块里都定义了instrument函数
     enabled = True
     execute = None
 
