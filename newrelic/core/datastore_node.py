@@ -13,6 +13,7 @@ _DatastoreNode = namedtuple('_DatastoreNode',
         'user_attributes',])
 
 
+# TODO  数据存储节点，指Redis等非关系型数据库，跟上面的Database有区别
 class DatastoreNode(_DatastoreNode, DatastoreNodeMixin):
 
     @property

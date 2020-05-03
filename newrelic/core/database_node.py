@@ -50,13 +50,13 @@ class SlowSqlNode(_SlowSqlNode):
 
 
 # TODO children
-#  children
-#  start_time
+#  children 下游节点，下游节点是怎么穿透起来的??????
+#  start_time 其实时间，在 DatastoreNodeMixin类里面用它来计算时间戳，在newrelic.core.trace_node计算时间差
 #  end_time
 #  is_async
 #  guid
-#  agent_attributes
-#  user_attributes
+#  agent_attributes   参数
+#  user_attributes    用户参数
 
 _DatabaseNode = namedtuple('_DatabaseNode',
         ['dbapi2_module', 'sql', 'children', 'start_time', 'end_time',
