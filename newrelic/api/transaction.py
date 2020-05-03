@@ -764,6 +764,7 @@ class Transaction(object):
 
     @property
     def distributed_trace_intrinsics(self):
+        # TODO 分布式链路上下文参数
         i_attrs = {}
 
         if not self._settings.distributed_tracing.enabled:

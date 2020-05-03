@@ -92,6 +92,7 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
 
     @property
     def target(self):
+        # TODO 获取操作目标的表
         return self.statement.target
 
     @property
@@ -108,7 +109,7 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
         database node as well as all the child nodes.
 
         """
-
+        # TODO 时间记录器，root是啥对象??????
         product = self.product
         operation = self.operation or 'other'
         target = self.target
@@ -172,6 +173,12 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
                     duration=self.duration, exclusive=self.exclusive)
 
     def slow_sql_node(self, stats, root):
+        """
+
+        :param  stats:
+        :param  newrelic.api.transaction.Transaction root:
+        :return:
+        """
         product = self.product
         operation = self.operation or 'other'
         target = self.target
@@ -210,6 +217,7 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
                 params=params)
 
     def trace_node(self, stats, root, connections):
+        # TODO 干嘛用的?????
         name = root.string_table.cache(self.name)
 
         start_time = newrelic.core.trace_node.node_start_time(root, self)
