@@ -1,2 +1,6 @@
-class ConfigurationError(Exception): pass
-class InstrumentationError(Exception): pass
+class ConfigurationError(Exception):
+    pass
+
+
+class InstrumentationError(Exception):
+    pass
