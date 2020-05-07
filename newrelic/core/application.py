@@ -111,7 +111,7 @@ class Application(object):
         # self._xray_profiler = None
         self.xray_session_running = False
 
-        self.profile_manager = profile_session_manager() # TODO 干嘛用的呢?????
+        self.profile_manager = profile_session_manager() # TODO 用来监控线程性能的管理器
 
         # This holds a dictionary of currently active xray sessions.
         # key = xray_id

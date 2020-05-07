@@ -21,6 +21,8 @@ _logger = logging.getLogger(__name__)
 
 
 def current_task(asyncio):
+    # TODO asyncio是 asyncio包，这里没有在文件头显示导入该包，但是在用的时候用了模块缓存隐式导入
+    # TODO 返回当前正在执行的任务，这里涉及到异步框架
     if not asyncio:
         return
 
@@ -35,6 +37,12 @@ def current_task(asyncio):
 
 
 def get_event_loop(task):
+    """
+
+    :param asyncio.Task task:
+    :return:
+    """
+    # TODO 获取循环事件
     get_loop = getattr(task, 'get_loop', None)
     if get_loop:
         return get_loop()
@@ -51,8 +59,10 @@ class cached_module(object):
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-
-        module = sys.modules.get(self.module_path)
+        # TODO sys.modules是一个全局字典，该字典是python启动后就加载在内存中。每当程序员导入新的模块，sys.modules都将记录这些模块。
+        #  字典sys.modules对于加载模块起到了缓冲的作用。当某个模块第一次导入，字典sys.modules将自动记录该模块。当第二次再导入该模块时，
+        #  python会直接到字典中查找，从而加快了程序运行的速度
+        module = sys.modules.get(self.module_path) # TODO 获取模块后就可以直接用了，不用在import
         if module:
             instance.__dict__[self.name] = module
             return module

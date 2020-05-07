@@ -26,6 +26,7 @@ AGENT_PACKAGE_DIRECTORY = os.path.dirname(newrelic.__file__) + '/' #TODO 代理�
 
 # TODO 线程分析器，线程分析会话，监控线程的
 
+
 class SessionState(object):
     # TODO 会话状态
     RUNNING = 1
@@ -41,6 +42,7 @@ class SessionType(object):
 def format_stack_trace(frame, thread_category):
     """Formats the frame obj into a list of stack trace tuples.
     """
+    # TODO frame types.FrameType
 
     stack_trace = deque()
 
@@ -51,7 +53,8 @@ def format_stack_trace(frame, thread_category):
         # at the time the stack frame was being viewed.
 
         code = frame.f_code
-
+        # TODO sys.intern函数旨在用于优化内存，sys.intern函数维护一个内部字符串表。当你试图实现一个字符串时，函数在表中查找它
+        # TODO 如果字符串不存在(尚未被捕获)，函数将它保存在表中并从互联字符串表返回它。
         filename = intern(code.co_filename)
         func_name = intern(code.co_name)
         first_line = code.co_firstlineno
@@ -96,6 +99,7 @@ def collect_stack_traces(include_nr_threads=False, include_xrays=False):
     python threads.
 
     """
+    # TODO txn 是api.transaction.Transaction
     for (txn, thread_id, thread_category, frame) in \
             trace_cache().active_threads():
 
@@ -141,14 +145,14 @@ class ProfileSessionManager(object):
 
         # Name of the application that requested the full_profile session.
 
-        self.full_profile_app = None # TODO 请求分线器的应用名称
+        self.full_profile_app = None # TODO 请求分析器的应用名称
 
         # Dict with app_name as key and another dictionary (let's call it child
         # dictionary) as value. The child dictionary has key_txn name as key
         # and x-ray profile session as value.
 
         self.application_xrays = {}
-        self.finished_sessions = defaultdict(list)
+        self.finished_sessions = defaultdict(list) # TODO 已经完成的性能分析会话
 
         self._profiler_shutdown = threading.Event()
         self._profiler_thread = None

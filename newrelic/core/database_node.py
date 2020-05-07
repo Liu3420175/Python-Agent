@@ -104,6 +104,13 @@ class DatabaseNode(_DatabaseNode, DatastoreNodeMixin):
                 self.sql_format)
 
     def time_metrics(self, stats, root, parent):
+        """
+        TODO root是啥?根请求?????
+        :param stats:
+        :param newrelic.core.transaction_node.TransactionNode root:
+        :param parent:
+        :return:
+        """
         """Return a generator yielding the timed metrics for this
         database node as well as all the child nodes.
 

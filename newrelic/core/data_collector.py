@@ -862,7 +862,7 @@ class ApplicationSession(object):
     def send_profile_data(self, profile_data):
         """Called to submit Profile Data.
         """
-
+        # TODO 发送线程性能数据
         if not profile_data:
             return
 
