@@ -3,6 +3,7 @@ construction of the raw transaction trace hierarchy from which metrics are
 then to be generated.
 
 """
+# TODO  事物数据结构，事物是这个系统最终于的概念，每个Web 应用的Request请求或者非Web应用，都称为事物
 
 from collections import namedtuple
 
@@ -12,30 +13,29 @@ import newrelic.core.trace_node
 from newrelic.core.metric import ApdexMetric, TimeMetric
 from newrelic.core.string_table import StringTable
 from newrelic.core.attribute import (create_user_attributes,
-        resolve_user_attributes, process_user_attribute)
+                                     resolve_user_attributes, process_user_attribute)
 from newrelic.core.attribute_filter import (DST_ERROR_COLLECTOR,
-        DST_TRANSACTION_TRACER, DST_TRANSACTION_EVENTS, DST_SPAN_EVENTS)
+                                            DST_TRANSACTION_TRACER, DST_TRANSACTION_EVENTS, DST_SPAN_EVENTS)
 
 # TODO 分析这快源码时，一定要结合newrelic.core.stats_engine.StatsEngine类分析
 _TransactionNode = namedtuple('_TransactionNode',
-        ['settings', 'path', 'type', 'group', 'base_name', 'name_for_metric',
-        'port', 'request_uri', 'queue_start', 'start_time',
-        'end_time', 'last_byte_time', 'response_time', 'total_time',
-        'duration', 'exclusive', 'root', 'errors', 'slow_sql',
-        'custom_events', 'apdex_t', 'suppress_apdex', 'custom_metrics', 'guid',
-        'cpu_time', 'suppress_transaction_trace', 'client_cross_process_id',
-        'referring_transaction_guid', 'record_tt', 'synthetics_resource_id',
-        'synthetics_job_id', 'synthetics_monitor_id', 'synthetics_header',
-        'is_part_of_cat', 'trip_id', 'path_hash', 'referring_path_hash',
-        'alternate_path_hashes', 'trace_intrinsics', 'agent_attributes',
-        'distributed_trace_intrinsics', 'user_attributes', 'priority',
-        'sampled', 'parent_transport_duration', 'parent_span', 'parent_type',
-        'parent_account', 'parent_app', 'parent_tx', 'parent_transport_type',
-        'root_span_guid', 'trace_id', 'loop_time',])
+                              ['settings', 'path', 'type', 'group', 'base_name', 'name_for_metric',
+                               'port', 'request_uri', 'queue_start', 'start_time',
+                               'end_time', 'last_byte_time', 'response_time', 'total_time',
+                               'duration', 'exclusive', 'root', 'errors', 'slow_sql',
+                               'custom_events', 'apdex_t', 'suppress_apdex', 'custom_metrics', 'guid',
+                               'cpu_time', 'suppress_transaction_trace', 'client_cross_process_id',
+                               'referring_transaction_guid', 'record_tt', 'synthetics_resource_id',
+                               'synthetics_job_id', 'synthetics_monitor_id', 'synthetics_header',
+                               'is_part_of_cat', 'trip_id', 'path_hash', 'referring_path_hash',
+                               'alternate_path_hashes', 'trace_intrinsics', 'agent_attributes',
+                               'distributed_trace_intrinsics', 'user_attributes', 'priority',
+                               'sampled', 'parent_transport_duration', 'parent_span', 'parent_type',
+                               'parent_account', 'parent_app', 'parent_tx', 'parent_transport_type',
+                               'root_span_guid', 'trace_id', 'loop_time', ])
 
 
 class TransactionNode(_TransactionNode):
-
     """Class holding data corresponding to the root of the transaction. All
     the nodes of interest recorded for the transaction are held as a tree
     structure within the 'children' attribute.
@@ -91,10 +91,10 @@ class TransactionNode(_TransactionNode):
             # the overview graphs.
 
             yield TimeMetric(
-                    name='HttpDispatcher',
-                    scope='',
-                    duration=self.response_time,
-                    exclusive=None)
+                name='HttpDispatcher',
+                scope='',
+                duration=self.response_time,
+                exclusive=None)
 
             # Upstream queue time within any web server front end.
 
@@ -110,18 +110,18 @@ class TransactionNode(_TransactionNode):
                     queue_wait = 0
 
                 yield TimeMetric(
-                        name='WebFrontend/QueueTime',
-                        scope='',
-                        duration=queue_wait,
-                        exclusive=None)
+                    name='WebFrontend/QueueTime',
+                    scope='',
+                    duration=queue_wait,
+                    exclusive=None)
 
         # Generate the full transaction metric.
 
         yield TimeMetric(
-                name=self.path,
-                scope='',
-                duration=self.response_time,
-                exclusive=self.exclusive)
+            name=self.path,
+            scope='',
+            duration=self.response_time,
+            exclusive=self.exclusive)
 
         # Generate the rollup metric.
 
@@ -131,10 +131,10 @@ class TransactionNode(_TransactionNode):
             rollup = self.type
 
         yield TimeMetric(
-                name=rollup,
-                scope='',
-                duration=self.response_time,
-                exclusive=self.exclusive)
+            name=rollup,
+            scope='',
+            duration=self.response_time,
+            exclusive=self.exclusive)
 
         # Generate Unscoped Total Time metrics.
 
@@ -146,16 +146,16 @@ class TransactionNode(_TransactionNode):
             metric_suffix = 'Other'
 
         yield TimeMetric(
-                name='%s/%s' % (metric_prefix, self.name_for_metric),
-                scope='',
-                duration=self.total_time,
-                exclusive=self.total_time)
+            name='%s/%s' % (metric_prefix, self.name_for_metric),
+            scope='',
+            duration=self.total_time,
+            exclusive=self.total_time)
 
         yield TimeMetric(
-                name=metric_prefix,
-                scope='',
-                duration=self.total_time,
-                exclusive=self.total_time)
+            name=metric_prefix,
+            scope='',
+            duration=self.total_time,
+            exclusive=self.total_time)
 
         # Generate Distributed Tracing metrics
 
@@ -192,24 +192,24 @@ class TransactionNode(_TransactionNode):
         if self.errors:
             # Generate overall rollup metric indicating if errors present.
             yield TimeMetric(
-                    name='Errors/all',
-                    scope='',
-                    duration=0.0,
-                    exclusive=None)
+                name='Errors/all',
+                scope='',
+                duration=0.0,
+                exclusive=None)
 
             # Generate individual error metric for transaction.
             yield TimeMetric(
-                    name='Errors/%s' % self.path,
-                    scope='',
-                    duration=0.0,
-                    exclusive=None)
+                name='Errors/%s' % self.path,
+                scope='',
+                duration=0.0,
+                exclusive=None)
 
             # Generate rollup metric for WebTransaction errors.
             yield TimeMetric(
-                    name='Errors/all%s' % metric_suffix,
-                    scope='',
-                    duration=0.0,
-                    exclusive=None)
+                name='Errors/all%s' % metric_suffix,
+                scope='',
+                duration=0.0,
+                exclusive=None)
 
         # Now for the children.
         for child in self.root.children:
@@ -254,20 +254,20 @@ class TransactionNode(_TransactionNode):
         # Generate the full apdex metric.
 
         yield ApdexMetric(
-                name='Apdex/%s' % self.name_for_metric,
-                satisfying=satisfying,
-                tolerating=tolerating,
-                frustrating=frustrating,
-                apdex_t=self.apdex_t)
+            name='Apdex/%s' % self.name_for_metric,
+            satisfying=satisfying,
+            tolerating=tolerating,
+            frustrating=frustrating,
+            apdex_t=self.apdex_t)
 
         # Generate the rollup metric.
 
         yield ApdexMetric(
-                name='Apdex',
-                satisfying=satisfying,
-                tolerating=tolerating,
-                frustrating=frustrating,
-                apdex_t=self.apdex_t)
+            name='Apdex',
+            satisfying=satisfying,
+            tolerating=tolerating,
+            frustrating=frustrating,
+            apdex_t=self.apdex_t)
 
     def error_details(self):
         """Return a generator yielding the details for each unique error
@@ -309,18 +309,17 @@ class TransactionNode(_TransactionNode):
             # add error specific custom params to this error's userAttributes
 
             err_attrs = create_user_attributes(error.custom_params,
-                    self.settings.attribute_filter)
+                                               self.settings.attribute_filter)
             for attr in err_attrs:
                 if attr.destinations & DST_ERROR_COLLECTOR:
                     params['userAttributes'][attr.name] = attr.value
 
             yield newrelic.core.error_collector.TracedError(
-                    start_time=error.timestamp,
-                    path=self.path,
-                    message=error.message,
-                    type=error.type,
-                    parameters=params)
-
+                start_time=error.timestamp,
+                path=self.path,
+                message=error.message,
+                type=error.type,
+                parameters=params)
 
     def transaction_trace(self, stats, limit, connections):
 
@@ -353,19 +352,19 @@ class TransactionNode(_TransactionNode):
         # from the actual top node for the transaction.
 
         root = newrelic.core.trace_node.TraceNode(
-                start_time=trace_node.start_time,
-                end_time=trace_node.end_time,
-                name='ROOT',
-                params={},
-                children=[trace_node],
-                label=None)
+            start_time=trace_node.start_time,
+            end_time=trace_node.end_time,
+            name='ROOT',
+            params={},
+            children=[trace_node],
+            label=None)
 
         return newrelic.core.trace_node.RootNode(
-                start_time=start_time,
-                empty0={},
-                empty1={},
-                root=root,
-                attributes=attributes)
+            start_time=start_time,
+            empty0={},
+            empty1={},
+            root=root,
+            attributes=attributes)
 
     def slow_sql_nodes(self, stats):
         for item in self.slow_sql:
@@ -433,13 +432,13 @@ class TransactionNode(_TransactionNode):
             intrinsics['nr.pathHash'] = self.path_hash
 
             _add_if_not_empty('nr.referringPathHash',
-                    self.referring_path_hash)
+                              self.referring_path_hash)
             _add_if_not_empty('nr.alternatePathHashes',
-                    ','.join(self.alternate_path_hashes))
+                              ','.join(self.alternate_path_hashes))
             _add_if_not_empty('nr.referringTransactionGuid',
-                    self.referring_transaction_guid)
+                              self.referring_transaction_guid)
             _add_if_not_empty('nr.apdexPerfZone',
-                    self.apdex_perf_zone())
+                              self.apdex_perf_zone())
 
         if self.synthetics_resource_id:
             intrinsics['nr.guid'] = self.guid
@@ -474,7 +473,7 @@ class TransactionNode(_TransactionNode):
             # add error specific custom params to this error's userAttributes
 
             err_attrs = create_user_attributes(error.custom_params,
-                    self.settings.attribute_filter)
+                                               self.settings.attribute_filter)
             for attr in err_attrs:
                 if attr.destinations & DST_ERROR_COLLECTOR:
                     user_attributes[attr.name] = attr.value
@@ -506,7 +505,6 @@ class TransactionNode(_TransactionNode):
 
         cache = getattr(self, '_event_intrinsics_cache', None)
         if cache is not None:
-
             # We don't want to execute this function more than once, since
             # it should always yield the same data per transaction
 
@@ -573,8 +571,8 @@ class TransactionNode(_TransactionNode):
         }
 
         for event in self.root.span_events(
-            settings,
-            base_attrs,
-            parent_guid=self.parent_span
+                settings,
+                base_attrs,
+                parent_guid=self.parent_span
         ):
             yield event

@@ -82,6 +82,7 @@ class TraceCache(object):
         greenlet then we use the greenlet ID instead of the thread ID.
 
         """
+        # TODO 获取当前线程
 
         if self.greenlet:
             # Greenlet objects are maintained in a tree structure with
@@ -110,6 +111,7 @@ class TraceCache(object):
         executing thread.
 
         """
+        #　TODO  trace与transaction是什么关系??????
 
         trace = self._cache.get(self.current_thread_id())
         return trace and trace.transaction
@@ -130,17 +132,18 @@ class TraceCache(object):
         as being for web transactions or background tasks.
 
         """
+        # TODO  返回活线程信息
 
         # First yield up those for real Python threads.
-
+        # TODO 返回一个字典，将每个线程的标识符映射到调用该函数时该线程中当前活动的最顶层堆栈帧
         for thread_id, frame in sys._current_frames().items():
             trace = self._cache.get(thread_id)
             transaction = trace and trace.transaction
             if transaction is not None:
-                if transaction.background_task:
+                if transaction.background_task: # TODO 如果是后台队列任务，非Web事物
                     yield transaction, thread_id, 'BACKGROUND', frame
                 else:
-                    yield transaction, thread_id, 'REQUEST', frame
+                    yield transaction, thread_id, 'REQUEST', frame # TODO Web事物
             else:
                 # Note that there may not always be a thread object.
                 # This is because thread could have been created direct
@@ -161,11 +164,12 @@ class TraceCache(object):
 
         debug = global_settings().debug
 
+        # TODO 启用协程分析
         if debug.enable_coroutine_profiling:
             for thread_id, trace in self._cache.items():
                 transaction = trace.transaction
                 if transaction and transaction._greenlet is not None:
-                    gr = transaction._greenlet()
+                    gr = transaction._greenlet() # TODO !!!!!!这一块要弄懂，还是要仔细了解下greenlet框架
                     if gr and gr.gr_frame is not None:
                         if transaction.background_task:
                             yield (transaction, thread_id,

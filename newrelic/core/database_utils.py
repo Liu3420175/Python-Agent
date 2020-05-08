@@ -396,7 +396,7 @@ def _parse_alter(sql):
 # being set to None.
 
 
-# TODO 操作表,这个SQL语句是查询操作,是插入操作还是其它
+# TODO SQL的操作类型,这个SQL语句是查询操作,是插入操作还是其它
 _operation_table = {
     'select': _parse_select,
     'delete': _parse_delete,
