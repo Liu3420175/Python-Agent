@@ -28,7 +28,7 @@ class Application(object):
         # we already have the lock held.
 
         agent = newrelic.core.agent.agent_instance()
-
+        # TODO 获取代理示例
         # Try first without lock. If we find it we can return.
 
         instance = Application._instances.get(name, None)

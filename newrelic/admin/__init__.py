@@ -24,6 +24,7 @@ def command(name, options='', description='', hidden=False,
         log_intercept=True, deprecated=False):
     # TODO 这个装饰器用的巧妙，不知不觉中吧admin目录下的文件的函数装载进了全局变量里
     def wrapper(callback):
+        # TODO 给可调用对象添加属性
         callback.name = name
         callback.options = options
         callback.description = description

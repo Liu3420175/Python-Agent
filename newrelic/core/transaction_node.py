@@ -18,6 +18,62 @@ from newrelic.core.attribute_filter import (DST_ERROR_COLLECTOR,
                                             DST_TRANSACTION_TRACER, DST_TRANSACTION_EVENTS, DST_SPAN_EVENTS)
 
 # TODO 分析这快源码时，一定要结合newrelic.core.stats_engine.StatsEngine类分析
+# TODO  settings
+#  path
+#  type
+#  group
+#  base_name
+#  name_for_metric
+#  port
+#  request_uri
+#  queue_start
+#  start_time
+#  end_time
+#  last_byte_time
+#  response_time
+#  total_time
+#  duration
+#  exclusive
+#  root
+#  errors
+#  slow_sql
+#  custom_events
+#  apdex_t
+#  suppress_apdex
+#  custom_metrics
+#  guid  当前 span_id
+#  cpu_time
+#  suppress_transaction_trace
+#  client_cross_process_id
+#  referring_transaction_guid
+#  record_tt
+#  synthetics_resource_id
+#  synthetics_job_id
+#  synthetics_monitor_id
+#  synthetics_header
+#  is_part_of_cat
+#  trip_id
+#  path_hash
+#  referring_path_hash
+#  alternate_path_hashes
+#  trace_intrinsics
+#  agent_attributes
+#  distributed_trace_intrinsics
+#  user_attributes
+#  priority
+#  sampled
+#  parent_transport_duration
+#  parent_span   父节点span_id
+#  parent_type
+#  parent_account
+#  parent_app
+#  parent_tx
+#  parent_transport_type
+#  root_span_guid 根节点span_id
+#  trace_id  一个链路的TraceID
+#  loop_time
+
+
 _TransactionNode = namedtuple('_TransactionNode',
                               ['settings', 'path', 'type', 'group', 'base_name', 'name_for_metric',
                                'port', 'request_uri', 'queue_start', 'start_time',
