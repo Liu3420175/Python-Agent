@@ -1,5 +1,5 @@
-"""This module implements data recording and reporting for an application.
-
+"""
+实现应用数据记录和上报
 """
 
 from __future__ import print_function
@@ -39,7 +39,7 @@ _logger = logging.getLogger(__name__)
 
 class Application(object):
 
-    """Class which maintains recorded data for a single application.
+    """维护单个应用程序的记录数据的类。
 
     """
 
@@ -282,7 +282,7 @@ class Application(object):
 
         # Remember when we started attempt to connect so can record a
         # metric of how long it actually took.
-
+        # TODO # 记录连接话费多长时间
         connect_start = time.time()
 
         # We perform a short sleep here to ensure that this thread is
@@ -326,7 +326,7 @@ class Application(object):
 
         retries = [(15, False, False), (15, False, False),
                    (30, False, False), (60, True, False),
-                   (120, False, False), (300, False, True), ] # TODO 重试
+                   (120, False, False), (300, False, True), ] # TODO 重试，重试计划
 
         connect_attempts = 0
 
@@ -356,6 +356,7 @@ class Application(object):
                 # regular expression syntax.
 
                 if active_session:
+                    # TODO 如果连接成功，校验某些格式化规则是否合法
                     configuration = active_session.configuration
 
                     try:
@@ -408,7 +409,7 @@ class Application(object):
                 # per schedule associated with the retry intervals.
 
                 if not active_session:
-                    if retries: # TODO 重试
+                    if retries: # TODO 重试，按照重试计划重试
                         timeout, warning, error = retries.pop(0)
 
                         if warning:
@@ -440,7 +441,7 @@ class Application(object):
 
             # We were successful. Ensure we have cleared out any cached
             # data from a prior agent run for this application.
-
+            # TODO  成功后,要确保清除之前代理的参数
             configuration = active_session.configuration
 
             with self._stats_lock:
