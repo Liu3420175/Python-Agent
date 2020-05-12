@@ -459,7 +459,7 @@ class StatsEngine(object):
         self.__slow_transaction_old_duration = None
         self.__slow_transaction_dry_harvests = 0
         self.__transaction_errors = [] # TODO 引发错误的事物
-        self._synthetics_events = LimitedDataSet() # TODO 合成事物????
+        self._synthetics_events = LimitedDataSet() # TODO 合成事物????,多个事物合在一起然后发送
         self.__synthetics_transactions = []
         self.__xray_transactions = []
         self.xray_sessions = {} # TODO X-Ray回话是啥?????

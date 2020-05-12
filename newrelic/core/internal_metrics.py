@@ -98,6 +98,7 @@ def internal_count_metric(name, count):
     """Create internal metric where only count has a value.
 
     All other fields have a value of 0.
+    TODO  计数器
     """
 
     count_metric = {'count': count}

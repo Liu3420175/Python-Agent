@@ -2,6 +2,8 @@
 construction of the raw transaction trace hierarchy from which metrics are
 then to be generated.
 
+TODO 事务跟踪提供了应用程序中单个事务的详细快照。 事务跟踪记录了可用的函数调用，数据库调用和外部调用。
+ 您可以使用事务跟踪来对性能问题进行故障排除，并获得有关应用程序工作方式的详细的低级见解。
 """
 # TODO  事物数据结构，事物是这个系统最终于的概念，每个Web 应用的Request请求或者非Web应用，都称为事物
 

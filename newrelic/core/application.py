@@ -1372,7 +1372,7 @@ class Application(object):
                 # trying to monitor scripts which perform a one off task
                 # and then immediately exit. Also useful when running
                 # test scripts.
-
+                # TODO 当收集过程被强行关闭,但是已经记录了一些事物的数据,并且收集时间少于1s,这个时候人为推迟收集，避免因为小于1s而导致数据丢失
                 if shutdown and (transaction_count or global_events_account):
                     if period_end - self._period_start < 1.0:
                         _logger.debug('Stretching harvest duration for '
@@ -1714,7 +1714,7 @@ class Application(object):
                 # created for this harvest if session still exists.
                 # New connection will be create automatically on the
                 # next harvest.
-
+                # 关闭会话，下次收集时在重新创建会话
                 if self._active_session:
                     self._active_session.close_connection()
 
