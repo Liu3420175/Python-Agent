@@ -342,7 +342,8 @@ class Application(object):
                 connect_attempts += 1 # TODO 尝试注册次数
 
                 internal_metrics = CustomMetrics()
-
+                # TODO 这是一个上下文管理器，用自定义指标来记录创建session花费的时间
+                # TODO 自定义指标对象主要用来监控内部一些过程的指标
                 with InternalTraceContext(internal_metrics):
                     active_session = create_session(None, self._app_name,
                             self.linked_applications, environment_settings(),
@@ -509,7 +510,7 @@ class Application(object):
             # anyone who has been waiting through calling the
             # wait_for_session_activation() method.
 
-            self._connected_event.set()
+            self._connected_event.set()  # TODO 标记会话激活已经完成
 
             # Start any data samplers so they are aware of the start of
             # the harvest period.
@@ -554,7 +555,7 @@ class Application(object):
         # process different to where the harvest thread was created.
         # Note that this only works for the case where a section had
         # been activated prior to the process being forked.
-
+        # TODO 检测中潜在的记录数据线程和上报数据线线程不在一个进程里
         if self._process_id and process_id != self._process_id:
             _logger.warning('Attempt to reactivate application or record '
                     'transactions in a process different to where the '
@@ -579,14 +580,14 @@ class Application(object):
             # We now zero out the process ID so we know we have already
             # generated a warning message.
 
-            self._process_id = 0
+            self._process_id = 0 # 警告消息生成后,进程号归0
 
     def normalize_name(self, name, rule_type):
         """Applies the agent normalization rules of the the specified
         rule type to the supplied name.
 
         """
-        # TODO 统一化命名
+        # TODO 根据规则类型，统一化命名
 
         if not self._active_session:
             return name, False
@@ -617,6 +618,7 @@ class Application(object):
         """Create a data sampler corresponding to the data source
         for this application.
 
+        ：:param source  采集指标的函数，是一个可调用对象
         """
         # TODO 为应用创建一个与数据源对应的数据采集器
 
@@ -743,7 +745,7 @@ class Application(object):
         additional locking will be required.
 
         """
-        # TODO 统计器记录自定义数据指标  只是记录,并没有将数据发送出去
+        # TODO 统计器记录自定义数据指标(次数等)  只是记录,并没有将数据发送出去
         if not self._active_session:
             return
 
@@ -828,7 +830,7 @@ class Application(object):
                     # into the main one under a thread lock. Do this to ensure
                     # that the process of generating the metrics into the stats
                     # don't unecessarily lock out another thread.
-
+                    # TODO  # 将统计数据累计到工作区，然后合并上报
                     stats = self._stats_engine.create_workarea()
                     stats.record_transaction(data)
 
@@ -841,7 +843,7 @@ class Application(object):
 
                     if settings.debug.record_transaction_failure:
                         raise
-
+                # TODO  启用线程分析器，分析该线程为啥失败，XRay_session就是起这个作用的，类似X射线检查内部问题
                 if (profile_samples and (data.path in
                         self._stats_engine.xray_sessions or
                         'WebTransaction/Agent/__profiler__' in
@@ -874,6 +876,7 @@ class Application(object):
                             raise
 
             with self._stats_lock:
+                # TODO 记录指标数据
                 try:
                     self._transaction_count += 1
                     self._last_transaction = data.end_time

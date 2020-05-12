@@ -1556,7 +1556,7 @@ class StatsEngine(object):
         """Creates and returns a new empty stats engine object. This would
         be used to distill stats from a single web transaction before then
         merging it back into the parent under a thread lock.
-
+          将统计数据累计到工作区，然后合并上报
         """
 
         stats = copy.copy(self)
