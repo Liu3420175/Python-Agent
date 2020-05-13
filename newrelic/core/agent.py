@@ -143,7 +143,7 @@ class Agent(object):
 
         check_environment()
 
-        if 'NEW_RELIC_ADMIN_COMMAND' in os.environ:
+        if 'NEW_RELIC_ADMIN_COMMAND' in os.environ: #　启动命令
             if settings.debug.log_agent_initialization:
                 _logger.info('Monitored application started using the '
                         'newrelic-admin command with command line of %s.',
@@ -182,6 +182,8 @@ class Agent(object):
         """Initialises the agent and attempt to establish a connection
         to the core application. Will start the harvest loop running but
         will not activate any applications.
+         初始化代理并尝试与核心应用建立连接.开始运行循环收集线程但不会激活应用
+         # TODO 应用程序和收集线程在不同的线程中
 
         """
 
@@ -194,8 +196,8 @@ class Agent(object):
         self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
 
         self._harvest_thread = threading.Thread(target=self._harvest_loop, # TODO 收集线程，是守护线程，_harvest_loop是一个时间调度起，可以执行定时任务
-                name='NR-Harvest-Thread')
-        self._harvest_thread.setDaemon(True) # TODO 设置为守护线程
+                name='NR-Harvest-Thread') # 循环收集线程
+        self._harvest_thread.setDaemon(True) # TODO 将收集线程设置成守护线程
         self._harvest_shutdown = threading.Event() # TODO 信号标志，用于线程间通信，将内部标志设置为true。 所有等待它成为真正的线程都被唤醒
 
         self._default_harvest_count = 0  # TODO 默认收集方式次数
@@ -290,7 +292,7 @@ class Agent(object):
 
     def application_attribute_filter(self, app_name):
         """Returns the attribute filter for the application."""
-        # TODO attribute filter是啥，起啥作用?????
+        # 获取应用属性命名规则
         application = self._applications.get(app_name)
         if application:
             return application.attribute_filter
@@ -348,7 +350,7 @@ class Agent(object):
                             'Attempt to activate application in a process '
                             'different to where the agent harvest thread was '
                             'started. No data will be reported for this '
-                            'process with pid of %d. Creation of the harvest ' # TODO 有个单独的收集数据线程????
+                            'process with pid of %d. Creation of the harvest ' 
                             'thread this application occurred in process with '
                             'pid %d. If no data at all is being reported for '
                             'your application, see '

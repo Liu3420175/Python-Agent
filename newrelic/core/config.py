@@ -680,7 +680,7 @@ _settings.strip_exception_messages.whitelist = []
 
 _settings.datastore_tracer.instance_reporting.enabled = True
 _settings.datastore_tracer.database_name_reporting.enabled = True
-
+# TODO Heroku是一个云平台服务
 _settings.heroku.use_dyno_names = _environ_as_bool(
         'NEW_RELIC_HEROKU_USE_DYNO_NAMES', default=True)
 _settings.heroku.dyno_name_prefixes_to_shorten = list(_environ_as_set(
