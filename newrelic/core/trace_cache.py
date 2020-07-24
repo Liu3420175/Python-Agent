@@ -1,5 +1,5 @@
 """This module implements a global cache for tracking any traces.
-# TODO 为正在跟踪的跟踪实现全局缓存
+# TODO 为正在跟踪的时间跟踪器(TimeTrace对象)实现全局缓存
 """
 
 import sys
@@ -62,7 +62,7 @@ class cached_module(object):
         # TODO sys.modules是一个全局字典，该字典是python启动后就加载在内存中。每当程序员导入新的模块，sys.modules都将记录这些模块。
         #  字典sys.modules对于加载模块起到了缓冲的作用。当某个模块第一次导入，字典sys.modules将自动记录该模块。当第二次再导入该模块时，
         #  python会直接到字典中查找，从而加快了程序运行的速度
-        module = sys.modules.get(self.module_path) # TODO 获取模块后就可以直接用了，不用在import
+        module = sys.modules.get(self.module_path)  # TODO 获取模块后就可以直接用了，不用在import
         if module:
             instance.__dict__[self.name] = module
             return module
@@ -111,7 +111,7 @@ class TraceCache(object):
         executing thread.
 
         """
-        #　TODO  trace与transaction是什么关系??????
+        # 　TODO  trace与transaction是什么关系??????
 
         trace = self._cache.get(self.current_thread_id())
         return trace and trace.transaction
@@ -140,10 +140,10 @@ class TraceCache(object):
             trace = self._cache.get(thread_id)
             transaction = trace and trace.transaction
             if transaction is not None:
-                if transaction.background_task: # TODO 如果是后台队列任务，非Web事物
+                if transaction.background_task:  # TODO 如果是后台队列任务，非Web事物
                     yield transaction, thread_id, 'BACKGROUND', frame
                 else:
-                    yield transaction, thread_id, 'REQUEST', frame # TODO Web事物
+                    yield transaction, thread_id, 'REQUEST', frame  # TODO Web事物
             else:
                 # Note that there may not always be a thread object.
                 # This is because thread could have been created direct
@@ -169,14 +169,14 @@ class TraceCache(object):
             for thread_id, trace in self._cache.items():
                 transaction = trace.transaction
                 if transaction and transaction._greenlet is not None:
-                    gr = transaction._greenlet() # TODO !!!!!!这一块要弄懂，还是要仔细了解下greenlet框架
+                    gr = transaction._greenlet()  # TODO !!!!!!这一块要弄懂，还是要仔细了解下greenlet框架
                     if gr and gr.gr_frame is not None:
                         if transaction.background_task:
                             yield (transaction, thread_id,
-                                    'BACKGROUND', gr.gr_frame)
+                                   'BACKGROUND', gr.gr_frame)
                         else:
                             yield (transaction, thread_id,
-                                    'REQUEST', gr.gr_frame)
+                                   'REQUEST', gr.gr_frame)
 
     def save_trace(self, trace):
         """Saves the specified trace away under the thread ID of
@@ -191,9 +191,9 @@ class TraceCache(object):
         if (thread_id in self._cache and
                 self._cache[thread_id].root is not trace.root):
             _logger.error('Runtime instrumentation error. Attempt to '
-                    'save a trace from an inactive transaction. '
-                    'Report this issue to New Relic support.\n%s',
-                    ''.join(traceback.format_stack()[:-1]))
+                          'save a trace from an inactive transaction. '
+                          'Report this issue to New Relic support.\n%s',
+                          ''.join(traceback.format_stack()[:-1]))
 
             raise RuntimeError('transaction already active')
 
@@ -243,9 +243,9 @@ class TraceCache(object):
 
         if thread_id not in self._cache:
             _logger.error('Runtime instrumentation error. Attempt to '
-                    'drop the trace but where none is active. '
-                    'Report this issue to New Relic support.\n%s',
-                    ''.join(traceback.format_stack()[:-1]))
+                          'drop the trace but where none is active. '
+                          'Report this issue to New Relic support.\n%s',
+                          ''.join(traceback.format_stack()[:-1]))
 
             raise RuntimeError('no active trace')
 
@@ -253,9 +253,9 @@ class TraceCache(object):
 
         if trace is not current:
             _logger.error('Runtime instrumentation error. Attempt to '
-                    'drop the trace when it is not the current '
-                    'trace. Report this issue to New Relic support.\n%s',
-                    ''.join(traceback.format_stack()[:-1]))
+                          'drop the trace when it is not the current '
+                          'trace. Report this issue to New Relic support.\n%s',
+                          ''.join(traceback.format_stack()[:-1]))
 
             raise RuntimeError('not the current trace')
 
@@ -314,7 +314,7 @@ class TraceCache(object):
             root.process_child(node, ignore_exclusive=True)
 
 
-_trace_cache = TraceCache() # TODO 单例模式，缓存追踪
+_trace_cache = TraceCache()  # TODO 单例模式，缓存追踪
 
 
 def trace_cache():

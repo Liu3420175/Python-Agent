@@ -6,38 +6,44 @@ import newrelic.packages.six as six
 import traceback
 from newrelic.core.trace_cache import trace_cache
 from newrelic.core.attribute import (
-        process_user_attribute, MAX_NUM_USER_ATTRIBUTES)
+    process_user_attribute, MAX_NUM_USER_ATTRIBUTES)
 from newrelic.api.settings import STRIP_EXCEPTION_MESSAGE
 
 _logger = logging.getLogger(__name__)
 
 
 class TimeTrace(object):
+    """
+    追踪链路的时间追踪器
+    """
 
     def __init__(self, parent=None):
         self.parent = parent
         self.root = None
-        self.child_count = 0
-        self.children = []
-        self.start_time = 0.0
-        self.end_time = 0.0
+        self.child_count = 0  # 子span个数
+        self.children = []  # 子span列表
+        self.start_time = 0.0  # 其实时间
+        self.end_time = 0.0  # 截止数据
         self.duration = 0.0
         self.exclusive = 0.0
-        self.thread_id = None
+        self.thread_id = None  # 线程id
         self.activated = False
-        self.exited = False
-        self.is_async = False
+        self.exited = False  # 是否已离开
+        self.is_async = False  # 是不是异步
         self.has_async_children = False
-        self.min_child_start_time = float('inf')
-        self.exc_data = (None, None, None)
+        self.min_child_start_time = float('inf')  # 最小子span的起始时间
+        self.exc_data = (None, None, None)  # 异常数据，(异常类型，异常信息，异常错误栈)
         self.should_record_segment_params = False
         # 16-digit random hex. Padded with zeros in the front.
-        self.guid = '%016x' % random.getrandbits(64)
-        self.agent_attributes = {}
-        self.user_attributes = {}
+        self.guid = '%016x' % random.getrandbits(64)  # span id
+        self.agent_attributes = {}  # 代理参数
+        self.user_attributes = {}  # 用户自定义参数
 
     @property
     def transaction(self):
+        """
+        一个事件追踪器有一个Web事务或者非Web，Web事务可以理解成一次HTTP请求
+        """
         return self.root and self.root.transaction
 
     @property
@@ -49,6 +55,8 @@ class TimeTrace(object):
         return self.child_count == len(self.children)
 
     def __enter__(self):
+        # TODO  上下文管理协议，这个设计用的好。进入上下文前，把一些必要的事情先干了，比如设置起始时间；
+        # TODO  在离开上下文的时候，又干一些事情
         self.parent = parent = self.parent or current_trace()
         if not parent:
             return self
@@ -60,6 +68,7 @@ class TimeTrace(object):
         #
         # Don't do any tracing if parent is designated
         # as a terminal node.
+        # 如果父节点已经退出或者是末位节点，就不进行任何追踪
         if parent.exited or parent.terminal_node():
             self.parent = None
             return parent
@@ -68,6 +77,7 @@ class TimeTrace(object):
 
         # Don't do further tracing of transaction if
         # it has been explicitly stopped.
+        # 如果事务已经停止，不进行任何追踪
         if transaction.stopped or not transaction.enabled:
             self.parent = None
             return self
@@ -76,18 +86,18 @@ class TimeTrace(object):
 
         self.root = parent.root
         self.should_record_segment_params = (
-                transaction.should_record_segment_params)
+            transaction.should_record_segment_params)
 
         # Record start time.
 
         self.start_time = time.time()
 
         cache = trace_cache()
-        self.thread_id = cache.current_thread_id()
+        self.thread_id = cache.current_thread_id()  # 获取当前追踪链路的线程id
 
         # Push ourselves as the current node and store parent.
         try:
-            cache.save_trace(self)
+            cache.save_trace(self)  # 将线程的追踪保存到缓存里
         except:
             self.parent = None
             raise
@@ -105,9 +115,9 @@ class TimeTrace(object):
 
         if not self.activated:
             _logger.error('Runtime instrumentation error. The __exit__() '
-                    'method of %r was called prior to __enter__() being '
-                    'called. Report this issue to New Relic support.\n%s',
-                    self, ''.join(traceback.format_stack()[:-1]))
+                          'method of %r was called prior to __enter__() being '
+                          'called. Report this issue to New Relic support.\n%s',
+                          self, ''.join(traceback.format_stack()[:-1]))
 
             return
 
@@ -159,6 +169,7 @@ class TimeTrace(object):
             trace_cache().pop_current(self)
 
     def add_custom_attribute(self, key, value):
+        # 添加用户自定义属性
         settings = self.settings
         if not settings:
             return
@@ -169,7 +180,7 @@ class TimeTrace(object):
 
         if len(self.user_attributes) >= MAX_NUM_USER_ATTRIBUTES:
             _logger.debug('Maximum number of custom attributes already '
-                    'added. Dropping attribute: %r=%r', key, value)
+                          'added. Dropping attribute: %r=%r', key, value)
             return
 
         self.user_attributes[key] = value
@@ -179,7 +190,7 @@ class TimeTrace(object):
 
         # Bail out if the transaction is not active or
         # collection of errors not enabled.
-
+        # 记录异常，调用的是事务对象Transaction的接口，很好理解
         transaction = self.transaction
         settings = transaction and transaction.settings
 
@@ -228,7 +239,7 @@ class TimeTrace(object):
             # for backward compatibility need to support '.' as
             # separator for time being. Check that with the ':'
             # last as we will use that name as the exception type.
-
+            # 组装异常错误信息名称
             if module:
                 names = ('%s:%s' % (module, name), '%s.%s' % (module, name))
             else:
@@ -256,7 +267,7 @@ class TimeTrace(object):
         if settings.high_security:
             if params:
                 _logger.debug('Cannot add custom parameters in '
-                        'High Security Mode.')
+                              'High Security Mode.')
         else:
             try:
                 for k, v in params.items():
@@ -265,8 +276,8 @@ class TimeTrace(object):
                         custom_params[name] = val
             except Exception:
                 _logger.debug('Parameters failed to validate for unknown '
-                        'reason. Dropping parameters for error: %r. Check '
-                        'traceback for clues.', fullname, exc_info=True)
+                              'reason. Dropping parameters for error: %r. Check '
+                              'traceback for clues.', fullname, exc_info=True)
                 custom_params = {}
 
         # Check to see if we need to strip the message before recording it.
@@ -298,19 +309,22 @@ class TimeTrace(object):
         # overiden.
         if 'error.class' in self.agent_attributes:
             transaction._record_supportability(
-                    'Supportability/'
-                    'SpanEvent/Errors/Dropped')
+                'Supportability/'
+                'SpanEvent/Errors/Dropped')
         # Add error details as agent attributes to span event.
+        # 添加一些代理的参数
         self._add_agent_attribute('error.class', fullname)
         self._add_agent_attribute('error.message', message)
 
         transaction._create_error_node(
-                settings, fullname, message, custom_params, self.guid, tb)
+            settings, fullname, message, custom_params, self.guid, tb)
 
     def _add_agent_attribute(self, key, value):
+        # 添加代理参数
         self.agent_attributes[key] = value
 
     def _force_exit(self, exc, value, tb):
+        # 强制退出上下文管理器
         self.child_count = len(self.children)
         return self.__exit__(exc, value, tb)
 
@@ -333,12 +347,15 @@ class TimeTrace(object):
             self._complete_trace()
 
     def _complete_trace(self):
+        # 结束追踪
+
+        # 如果Web事务都已经结束，这个时候时间追踪器就是异常，这个时候就要做一些"善后"的事了
         # transaction already completed, this is an error
         if self.parent is None:
             _logger.error('Runtime instrumentation error. The transaction '
-                    'already completed meaning a child called complete trace '
-                    'after the trace had been finalized. Trace: %r \n%s',
-                    self, ''.join(traceback.format_stack()[:-1]))
+                          'already completed meaning a child called complete trace '
+                          'after the trace had been finalized. Trace: %r \n%s',
+                          self, ''.join(traceback.format_stack()[:-1]))
 
             return
 
@@ -404,7 +421,7 @@ class TimeTrace(object):
         return False
 
     def update_async_exclusive_time(self, min_child_start_time,
-            exclusive_duration):
+                                    exclusive_duration):
         # if exited and the child started after, there's no overlap on the
         # exclusive time
         if self.exited and (self.end_time < min_child_start_time):
@@ -412,7 +429,7 @@ class TimeTrace(object):
         # else there is overlap and we need to compute it
         elif self.exited:
             exclusive_delta = (self.end_time -
-                    min_child_start_time)
+                               min_child_start_time)
 
             # we don't want to double count the partial exclusive time
             # attributed to this trace, so we should reset the child start time
@@ -431,7 +448,7 @@ class TimeTrace(object):
         if self.parent and exclusive_duration_remaining > 0.0:
             # call parent exclusive duration delta
             self.parent.update_async_exclusive_time(min_child_start_time,
-                    exclusive_duration_remaining)
+                                                    exclusive_duration_remaining)
 
     def process_child(self, node):
         self.children.append(node)
@@ -439,15 +456,14 @@ class TimeTrace(object):
 
             # record the lowest start time
             self.min_child_start_time = min(self.min_child_start_time,
-                    node.start_time)
+                                            node.start_time)
 
             # if there are no children running, finalize exclusive time
             if self.child_count == len(self.children):
-
                 exclusive_duration = node.end_time - self.min_child_start_time
 
                 self.update_async_exclusive_time(self.min_child_start_time,
-                        exclusive_duration)
+                                                 exclusive_duration)
 
                 # reset time range tracking
                 self.min_child_start_time = float('inf')
@@ -505,13 +521,13 @@ def get_linking_metadata():
 
 
 def record_exception(exc=None, value=None, tb=None, params={},
-        ignore_errors=[], application=None):
+                     ignore_errors=[], application=None):
     if application is None:
         trace = current_trace()
         if trace:
             trace.record_exception((exc, value, tb), params,
-                    ignore_errors)
+                                   ignore_errors)
     else:
         if application.enabled:
             application.record_exception(exc, value, tb, params,
-                    ignore_errors)
+                                         ignore_errors)

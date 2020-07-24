@@ -9,7 +9,8 @@ import time
 import sched
 import logging
 import threading
-import atexit # TODO 模块定义了清理函数的注册和反注册函数. 被注册的函数会在解释器正常终止时执行. atexit 会按照注册顺序的*逆序*执行; 如果你注册了 A, B 和 C, 那么在解释器终止时会依序执行 C, B, A.
+import \
+    atexit  # TODO 模块定义了清理函数的注册和反注册函数. 被注册的函数会在解释器正常终止时执行. atexit 会按照注册顺序的*逆序*执行; 如果你注册了 A, B 和 C, 那么在解释器终止时会依序执行 C, B, A.
 import traceback
 
 import newrelic
@@ -37,31 +38,31 @@ def check_environment():
 
         if not hasattr(uwsgi, 'version_info'):
             _logger.warning('The New Relic Python Agent requires version '
-                    '1.2.6 or newer of uWSGI. The newer '
-                    'version is required because older versions of uWSGI '
-                    'have a bug whereby it is not compliant with the WSGI '
-                    '(PEP 333) specification. This bug in uWSGI will result '
-                    'in data being reported incorrectly. For more details see '
-                    'https://newrelic.com/docs/python/python-agent-and-uwsgi.')
+                            '1.2.6 or newer of uWSGI. The newer '
+                            'version is required because older versions of uWSGI '
+                            'have a bug whereby it is not compliant with the WSGI '
+                            '(PEP 333) specification. This bug in uWSGI will result '
+                            'in data being reported incorrectly. For more details see '
+                            'https://newrelic.com/docs/python/python-agent-and-uwsgi.')
         elif ((hasattr(uwsgi, 'version_info') and
-                  uwsgi.version_info[:3] < (1, 2, 6))):
+               uwsgi.version_info[:3] < (1, 2, 6))):
             _logger.warning('The New Relic Python Agent requires version '
-                    '1.2.6 or newer of uWSGI, you are using %r. The newer '
-                    'version is required because older versions of uWSGI '
-                    'have a bug whereby it is not compliant with the WSGI '
-                    '(PEP 333) specification. This bug in uWSGI will result '
-                    'in data being reported incorrectly. For more details see '
-                    'https://newrelic.com/docs/python/python-agent-and-uwsgi.',
-                    '.'.join(map(str, uwsgi.version_info[:3])))
+                            '1.2.6 or newer of uWSGI, you are using %r. The newer '
+                            'version is required because older versions of uWSGI '
+                            'have a bug whereby it is not compliant with the WSGI '
+                            '(PEP 333) specification. This bug in uWSGI will result '
+                            'in data being reported incorrectly. For more details see '
+                            'https://newrelic.com/docs/python/python-agent-and-uwsgi.',
+                            '.'.join(map(str, uwsgi.version_info[:3])))
 
         if (hasattr(uwsgi, 'opt') and hasattr(uwsgi.opt, 'get') and
                 not uwsgi.opt.get('enable-threads')):
             _logger.warning('The New Relic Python Agent requires that when '
-                    'using uWSGI that the enable-threads option be given '
-                    'to uwsgi when it is run. If the option is not supplied '
-                    'then threading will not be enabled and you will see no '
-                    'data being reported by the agent. For more details see '
-                    'https://newrelic.com/docs/python/python-agent-and-uwsgi.')
+                            'using uWSGI that the enable-threads option be given '
+                            'to uwsgi when it is run. If the option is not supplied '
+                            'then threading will not be enabled and you will see no '
+                            'data being reported by the agent. For more details see '
+                            'https://newrelic.com/docs/python/python-agent-and-uwsgi.')
 
 
 class Agent(object):
@@ -106,8 +107,8 @@ class Agent(object):
 
     _instance_lock = threading.Lock()
     _instance = None
-    _startup_callables = [] # TODO 需要在启动时运行的回调对象,一般存储自定义的钩子,统计指标
-    _registration_callables = {} # TODO 注册的回调对象
+    _startup_callables = []  # TODO 需要在启动时运行的回调对象,一般存储自定义的钩子,统计指标
+    _registration_callables = {}  # TODO 注册的回调对象
 
     @staticmethod
     def run_on_startup(callable):
@@ -137,34 +138,34 @@ class Agent(object):
         # such the logging system was not initialised already,
         # we trigger initialisation again here.
 
-        initialize_logging(settings.log_file, settings.log_level) # TODO 初始化日志
+        initialize_logging(settings.log_file, settings.log_level)  # TODO 初始化日志
 
         _logger.info('New Relic Python Agent (%s)' % newrelic.version)
 
         check_environment()
 
-        if 'NEW_RELIC_ADMIN_COMMAND' in os.environ: #　启动命令
+        if 'NEW_RELIC_ADMIN_COMMAND' in os.environ:  # 启动命令
             if settings.debug.log_agent_initialization:
                 _logger.info('Monitored application started using the '
-                        'newrelic-admin command with command line of %s.',
-                        os.environ['NEW_RELIC_ADMIN_COMMAND'])
+                             'newrelic-admin command with command line of %s.',
+                             os.environ['NEW_RELIC_ADMIN_COMMAND'])
             else:
                 _logger.debug('Monitored application started using the '
-                        'newrelic-admin command with command line of %s.',
-                        os.environ['NEW_RELIC_ADMIN_COMMAND'])
+                              'newrelic-admin command with command line of %s.',
+                              os.environ['NEW_RELIC_ADMIN_COMMAND'])
 
         with Agent._instance_lock:
             if not Agent._instance:
                 if settings.debug.log_agent_initialization:
                     _logger.info('Creating instance of Python agent in '
-                            'process %d.', os.getpid())
+                                 'process %d.', os.getpid())
                     _logger.info('Agent was initialized from: %r',
-                            ''.join(traceback.format_stack()[:-1]))
+                                 ''.join(traceback.format_stack()[:-1]))
                 else:
                     _logger.debug('Creating instance of Python agent in '
-                            'process %d.', os.getpid())
+                                  'process %d.', os.getpid())
                     _logger.debug('Agent was initialized from: %r',
-                            ''.join(traceback.format_stack()[:-1]))
+                                  ''.join(traceback.format_stack()[:-1]))
 
                 instance = Agent(settings)
                 _logger.debug('Registering builtin data sources.')
@@ -192,13 +193,14 @@ class Agent(object):
         self._creation_time = time.time()
         self._process_id = os.getpid()  # TODO 当前进程id
         # TODO _applications 的结构 str:core.application.Application
-        self._applications = {} # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
-        self._config = config # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
+        self._applications = {}  # TODO 需要上报数据的application，默认是空字典，那如何给它赋值呢，在api/application的Application对象里有相关方法
+        self._config = config  # TODO 阅读agent_singleton函数源码可知config最后就是global_settings
 
-        self._harvest_thread = threading.Thread(target=self._harvest_loop, # TODO 收集线程，是守护线程，_harvest_loop是一个时间调度起，可以执行定时任务
-                name='NR-Harvest-Thread') # 循环收集线程
-        self._harvest_thread.setDaemon(True) # TODO 将收集线程设置成守护线程
-        self._harvest_shutdown = threading.Event() # TODO 信号标志，用于线程间通信，将内部标志设置为true。 所有等待它成为真正的线程都被唤醒
+        self._harvest_thread = threading.Thread(target=self._harvest_loop,
+                                                # TODO 收集线程，是守护线程，_harvest_loop是一个时间调度起，可以执行定时任务
+                                                name='NR-Harvest-Thread')  # 循环收集线程
+        self._harvest_thread.setDaemon(True)  # TODO 将收集线程设置成守护线程
+        self._harvest_shutdown = threading.Event()  # TODO 信号标志，用于线程间通信，将内部标志设置为true。 所有等待它成为真正的线程都被唤醒
 
         self._default_harvest_count = 0  # TODO 默认收集方式次数
         self._flexible_harvest_count = 0  # TODO 弹性收集方式次数
@@ -207,15 +209,15 @@ class Agent(object):
         self._default_harvest_duration = 0.0  # TODO 默认收集方式耗时
         self._flexible_harvest_duration = 0.0  # TODO 弹性收集方式耗时
         self._scheduler = sched.scheduler(  # TODO 事件调度器，有它可以实现周期任务，优先级任务
-                self._harvest_timer,  # TODO 第一个参数是一个可以返回时间戳的函数，第二个参数可以在定时未到达之前阻塞
-                self._harvest_shutdown.wait)
+            self._harvest_timer,  # TODO 第一个参数是一个可以返回时间戳的函数，第二个参数可以在定时未到达之前阻塞
+            self._harvest_shutdown.wait)
 
         self._process_shutdown = False
 
         self._lock = threading.Lock()
 
-        if self._config.enabled: # TODO 是否开启代理， _settings.enabled
-            atexit.register(self._atexit_shutdown) # TODO 将代理关闭函数注册为终止时执行函数
+        if self._config.enabled:  # TODO 是否开启代理， _settings.enabled
+            atexit.register(self._atexit_shutdown)  # TODO 将代理关闭函数注册为终止时执行函数
 
             # Register an atexit hook for uwsgi to facilitate the graceful
             # reload of workers. This is necessary for uwsgi with gevent
@@ -238,33 +240,33 @@ class Agent(object):
 
                 uwsgi.atexit = uwsgi_atexit_callback
 
-        self._data_sources = {} # TODO 要上报的数据指标，在这里面叫数据源
+        self._data_sources = {}  # TODO 要上报的数据指标，在这里面叫数据源
 
     def dump(self, file):
         """Dumps details about the agent to the file object."""
 
         print('Time Created: %s' % (
-                time.asctime(time.localtime(self._creation_time))), file=file)
+            time.asctime(time.localtime(self._creation_time))), file=file)
         print('Initialization PID: %s' % (
-                self._process_id), file=file)
+            self._process_id), file=file)
         print('Default Harvest Count: %d' % (
-                self._default_harvest_count), file=file)
+            self._default_harvest_count), file=file)
         print('Flexible Harvest Count: %d' % (
-                self._flexible_harvest_count), file=file)
+            self._flexible_harvest_count), file=file)
         print('Last Default Harvest: %s' % (
-                time.asctime(time.localtime(self._last_default_harvest))),
-                file=file)
+            time.asctime(time.localtime(self._last_default_harvest))),
+              file=file)
         print('Last Flexible Harvest: %s' % (
-                time.asctime(time.localtime(self._last_flexible_harvest))),
-                file=file)
+            time.asctime(time.localtime(self._last_flexible_harvest))),
+              file=file)
         print('Default Harvest Duration: %.2f' % (
-                self._default_harvest_duration), file=file)
+            self._default_harvest_duration), file=file)
         print('Flexible Harvest Duration: %.2f' % (
-                self._flexible_harvest_duration), file=file)
+            self._flexible_harvest_duration), file=file)
         print('Agent Shutdown: %s' % (
-                self._harvest_shutdown.isSet()), file=file)
+            self._harvest_shutdown.isSet()), file=file)
         print('Applications: %r' % (
-                sorted(self._applications.keys())), file=file)
+            sorted(self._applications.keys())), file=file)
 
     def global_settings(self):
         """Returns the global default settings object. If access is
@@ -284,7 +286,7 @@ class Agent(object):
         the agent in case that hasn't been done previously.
 
         """
-        #TODO 获取某个应用的配置
+        # TODO 获取某个应用的配置
         application = self._applications.get(app_name)
 
         if application:
@@ -335,7 +337,7 @@ class Agent(object):
             if settings.serverless_mode.enabled:
                 timeout = 10.0
             else:
-                timeout = settings.startup_timeout # TODO 默认是0
+                timeout = settings.startup_timeout  # TODO 默认是0
 
         activate_session = False
 
@@ -347,36 +349,36 @@ class Agent(object):
 
                 if process_id != self._process_id:
                     _logger.warning(
-                            'Attempt to activate application in a process '
-                            'different to where the agent harvest thread was '
-                            'started. No data will be reported for this '
-                            'process with pid of %d. Creation of the harvest ' 
-                            'thread this application occurred in process with '
-                            'pid %d. If no data at all is being reported for '
-                            'your application, see '
-                            'https://docs.newrelic.com/docs/agents/'
-                            'python-agent/troubleshooting/'
-                            'activate-application-warning-python '
-                            'for troubleshooting steps. If the issue '
-                            'persists, please send debug logs to New Relic '
-                            'support for assistance.',
-                            process_id,
-                            self._process_id)
+                        'Attempt to activate application in a process '
+                        'different to where the agent harvest thread was '
+                        'started. No data will be reported for this '
+                        'process with pid of %d. Creation of the harvest '
+                        'thread this application occurred in process with '
+                        'pid %d. If no data at all is being reported for '
+                        'your application, see '
+                        'https://docs.newrelic.com/docs/agents/'
+                        'python-agent/troubleshooting/'
+                        'activate-application-warning-python '
+                        'for troubleshooting steps. If the issue '
+                        'persists, please send debug logs to New Relic '
+                        'support for assistance.',
+                        process_id,
+                        self._process_id)
 
                 if settings.debug.log_agent_initialization:
                     _logger.info('Creating application instance for %r '
-                            'in process %d.', app_name, os.getpid())
+                                 'in process %d.', app_name, os.getpid())
                     _logger.info('Application was activated from: %r',
-                            ''.join(traceback.format_stack()[:-1]))
+                                 ''.join(traceback.format_stack()[:-1]))
                 else:
                     _logger.debug('Creating application instance for %r '
-                            'in process %d.', app_name, os.getpid())
+                                  'in process %d.', app_name, os.getpid())
                     _logger.debug('Application was activated from: %r',
-                            ''.join(traceback.format_stack()[:-1]))
+                                  ''.join(traceback.format_stack()[:-1]))
 
                 linked_applications = sorted(set(linked_applications))
                 application = newrelic.core.application.Application(
-                        app_name, linked_applications)
+                    app_name, linked_applications)
                 application._uninstrumented = uninstrumented_modules
                 self._applications[app_name] = application
                 activate_session = True
@@ -386,26 +388,26 @@ class Agent(object):
                 for source, name, settings, properties in \
                         self._data_sources.get(None, []):
                     application.register_data_source(source, name,
-                            settings, **properties)
+                                                     settings, **properties)
                 # TODO 自定义数据指标是怎么注册的呢?
                 for source, name, settings, properties in \
                         self._data_sources.get(app_name, []):
                     application.register_data_source(source, name,
-                            settings, **properties)
+                                                     settings, **properties)
 
             else:
                 # Do some checks to see whether try to reactivate the
                 # application in a different process to what it was
                 # originally activated in.
 
-                application.validate_process() # TODO 校验进程号
+                application.validate_process()  # TODO 校验进程号
 
             # Activate the session if application was just created and wait
             # for session activation if a timeout was specified. This may
             # bail out early if is detected that a deadlock may occur for
             # the period of the timeout.
 
-            if activate_session: # TODO 为啥要加这个条件?????
+            if activate_session:  # TODO 为啥要加这个条件?????
                 application.activate_session(self.activate_agent, timeout)
 
     @property
@@ -437,27 +439,27 @@ class Agent(object):
         return self._applications.get(app_name, None)
 
     def register_data_source(self, source, application=None,
-                name=None, settings=None, **properties):
+                             name=None, settings=None, **properties):
         """Registers the specified data source.
 
         """
         # TODO 注册数据源，数据源是啥?数据源就是指要上报的数据指标
 
         _logger.debug('Register data source with agent %r.',
-                (source, application, name, settings, properties))
+                      (source, application, name, settings, properties))
 
         with self._lock:
             # Remember the data sources in case we need them later.
 
             self._data_sources.setdefault(application, []).append(
-                    (source, name, settings, properties))
+                (source, name, settings, properties))
 
-            if application is None: # TODO 如果没有制定应用，就将数据源注册到每个应用里
+            if application is None:  # TODO 如果没有制定应用，就将数据源注册到每个应用里
                 # Bind to any applications that already exist.
 
                 for application in list(six.itervalues(self._applications)):
                     application.register_data_source(source, name,
-                            settings, **properties)
+                                                     settings, **properties)
 
             else:
                 # Bind to specific application if it exists.
@@ -466,13 +468,13 @@ class Agent(object):
 
                 if instance is not None:
                     instance.register_data_source(source, name,
-                            settings, **properties)
+                                                  settings, **properties)
 
     def remove_thread_utilization(self):
         # TODO 移除线程利用率
 
         _logger.debug('Removing thread utilization data source from all '
-                'applications')
+                      'applications')
 
         source_name = thread_utilization_data_source.__name__
         factory_name = 'Thread Utilization'
@@ -497,7 +499,7 @@ class Agent(object):
         _utilization_trackers.clear()
 
     def record_exception(self, app_name, exc=None, value=None, tb=None,
-            params={}, ignore_errors=[]):
+                         params={}, ignore_errors=[]):
 
         application = self._applications.get(app_name, None)
         if application is None or not application.active:
@@ -570,14 +572,14 @@ class Agent(object):
 
     def _harvest_flexible(self, shutdown=False):
         # TODO 弹性收集Application数据
-        if not self._harvest_shutdown.isSet(): # TODO 如果线程阻塞，再将收集任务放进调度任务器里，这是一个递归调用的过程，一直等待阻塞结束
+        if not self._harvest_shutdown.isSet():  # TODO 如果线程阻塞，再将收集任务放进调度任务器里，这是一个递归调用的过程，一直等待阻塞结束
             event_harvest_config = self.global_settings().event_harvest_config
 
             self._scheduler.enter(
-                    event_harvest_config.report_period_ms / 1000.0,
-                    1,
-                    self._harvest_flexible,
-                    ())
+                event_harvest_config.report_period_ms / 1000.0,
+                1,
+                self._harvest_flexible,
+                ())
             _logger.debug('Commencing flexible harvest of application data.')
         elif not shutdown:
             return
@@ -587,7 +589,7 @@ class Agent(object):
         self._flexible_harvest_count += 1
         self._last_flexible_harvest = time.time()
 
-        for application in list(six.itervalues(self._applications)): # TODO 为每个应用收集数据
+        for application in list(six.itervalues(self._applications)):  # TODO 为每个应用收集数据
             try:
                 application.harvest(shutdown=False, flexible=True)
             except Exception:
@@ -595,10 +597,10 @@ class Agent(object):
                                   'for %s.' % application.name)
 
         self._flexible_harvest_duration = \
-                time.time() - self._last_flexible_harvest
+            time.time() - self._last_flexible_harvest
 
         _logger.debug('Completed flexible harvest of application data in %.2f '
-                'seconds.', self._flexible_harvest_duration)
+                      'seconds.', self._flexible_harvest_duration)
 
     def _harvest_default(self, shutdown=False):
         # TODO 默认收集
@@ -621,14 +623,14 @@ class Agent(object):
                                   'for %s.' % application.name)
 
         self._default_harvest_duration = \
-                time.time() - self._last_default_harvest
+            time.time() - self._last_default_harvest
 
         _logger.debug('Completed default harvest of application data in %.2f '
-                'seconds.', self._default_harvest_duration)
+                      'seconds.', self._default_harvest_duration)
 
     def _harvest_timer(self):
-        if self._harvest_shutdown.isSet(): # TODO 如果事件对象标志是true，所有等待它的线程都被唤醒
-            return float("inf") # TODO 返回正无穷大，不阻塞
+        if self._harvest_shutdown.isSet():  # TODO 如果事件对象标志是true，所有等待它的线程都被唤醒
+            return float("inf")  # TODO 返回正无穷大，不阻塞
         return time.time()
 
     def _harvest_loop(self):
@@ -638,15 +640,15 @@ class Agent(object):
         event_harvest_config = settings.event_harvest_config
 
         self._scheduler.enter(
-                event_harvest_config.report_period_ms / 1000.0, # TODO 间隔时间默认是60s
-                1,
-                self._harvest_flexible,
-                ())
+            event_harvest_config.report_period_ms / 1000.0,  # TODO 间隔时间默认是60s
+            1,
+            self._harvest_flexible,
+            ())
         self._scheduler.enter(
-                60.0,
-                2,
-                self._harvest_default,
-                ())
+            60.0,
+            2,
+            self._harvest_default,
+            ())
 
         try:
             self._scheduler.run()
@@ -658,18 +660,18 @@ class Agent(object):
 
             if self._process_shutdown:
                 _logger.exception('Unexpected exception in main harvest '
-                        'loop when process being shutdown. This can occur '
-                        'in rare cases due to the main thread cleaning up '
-                        'and destroying objects while the background harvest '
-                        'thread is still running. If this message occurs '
-                        'rarely, it can be ignored. If the message occurs '
-                        'on a regular basis, then please report it to New '
-                        'Relic support for further investigation.')
+                                  'loop when process being shutdown. This can occur '
+                                  'in rare cases due to the main thread cleaning up '
+                                  'and destroying objects while the background harvest '
+                                  'thread is still running. If this message occurs '
+                                  'rarely, it can be ignored. If the message occurs '
+                                  'on a regular basis, then please report it to New '
+                                  'Relic support for further investigation.')
 
             else:
                 _logger.exception('Unexpected exception in main harvest '
-                        'loop. Please report this problem to New Relic '
-                        'support for further investigation.')
+                                  'loop. Please report this problem to New Relic '
+                                  'support for further investigation.')
 
     def activate_agent(self):
         """Starts the main background for the agent."""
@@ -681,7 +683,7 @@ class Agent(object):
                 return
             elif self._config.serverless_mode.enabled:
                 _logger.debug(
-                        'Harvest thread is disabled due to serverless mode.')
+                    'Harvest thread is disabled due to serverless mode.')
                 return
             elif self._config.debug.disable_harvest_until_shutdown:
                 _logger.debug('Harvest thread is disabled.')
@@ -713,7 +715,7 @@ class Agent(object):
         self.shutdown_agent()
 
     def shutdown_agent(self, timeout=None):
-        if self._harvest_shutdown.isSet(): # TODO 说明线程还在运行,直接返回
+        if self._harvest_shutdown.isSet():  # TODO 说明线程还在运行,直接返回
             return
 
         if timeout is None:
@@ -726,23 +728,23 @@ class Agent(object):
         # popped until harvest_shutdown is set.
         # TODO 加入无限周期任务
         self._scheduler.enter(
-                float('inf'),
-                3,
-                self._harvest_flexible,
-                (True,))
+            float('inf'),
+            3,
+            self._harvest_flexible,
+            (True,))
         self._scheduler.enter(
-                float('inf'),
-                4,
-                self._harvest_default,
-                (True,))
+            float('inf'),
+            4,
+            self._harvest_default,
+            (True,))
 
-        self._harvest_shutdown.set() # TODO 所有采集任务都开始执行,不用阻塞
+        self._harvest_shutdown.set()  # TODO 所有采集任务都开始执行,不用阻塞
 
         if self._config.debug.disable_harvest_until_shutdown:
             _logger.debug('Start Python Agent main thread on shutdown.')
             self._harvest_thread.start()
 
-        if self._harvest_thread.is_alive(): # TODO 如果采集线程还是活的,一直运行到超时
+        if self._harvest_thread.is_alive():  # TODO 如果采集线程还是活的,一直运行到超时
             self._harvest_thread.join(timeout)
 
 
@@ -766,11 +768,11 @@ def shutdown_agent(timeout=None):
 
 
 def register_data_source(source, application=None, name=None,
-        settings=None, **properties):
+                         settings=None, **properties):
     agent = agent_instance()
     agent.register_data_source(source,
-            application and application.name or None, name, settings,
-            **properties)
+                               application and application.name or None, name, settings,
+                               **properties)
 
 
 def _remove_thread_utilization():
